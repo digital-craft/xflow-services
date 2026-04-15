@@ -1,0 +1,3 @@
+spring:
+  application:
+    name: xflow-api-gateway

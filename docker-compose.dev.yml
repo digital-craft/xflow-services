@@ -1,0 +1,34 @@
+services:
+  postgres:
+    container_name: postgres-dev
+
+  redis:
+    container_name: redis-dev
+
+  xflow-api-gateway:
+    build:
+      target: dev
+    container_name: api-gateway-dev
+    environment:
+      - SPRING_PROFILES_ACTIVE=${ENV:-dev}
+    volumes:
+      - ./:/app
+    working_dir: /app/services/xflow-api-gateway
+
+  xflow-auth-service:
+    build:
+      target: dev
+    container_name: auth-service-dev
+    environment:
+      - SPRING_PROFILES_ACTIVE=${ENV:-dev}
+    volumes:
+      - ./:/app
+    working_dir: /app/services/xflow-auth-service
+
+volumes:
+  pgdata:
+  
+networks:
+  xflow-network:
+    name: ${COMPOSE_PROJECT_NAME:-xflow}-network-dev
+    # external: true

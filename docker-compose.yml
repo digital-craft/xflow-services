@@ -1,0 +1,71 @@
+services:
+  postgres:
+    image: postgis/postgis:16-3.4
+    container_name: postgres
+    environment:
+      POSTGRES_PORT: ${POSTGRES_PORT:-5432}
+      POSTGRES_DB: ${POSTGRES_DB:-xflow}
+      POSTGRES_USER: ${POSTGRES_USER:-xflow}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-xflow}
+    healthcheck:
+      test: ["CMD", "pg_isready", "-d", "${POSTGRES_DB}", "-U", "${POSTGRES_USER}"]
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - xflow-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - xflow-network
+
+  xflow-api-gateway:
+    build:
+      context: ./services/xflow-api-gateway
+    volumes:
+      - ./services/xflow-api-gateway:/app
+    ports:
+      - "${API_GATEWAY_PORT:-8080}:8080"
+    command: ["./mvnw", "spring-boot:run"]
+    depends_on:
+      - xflow-auth-service
+    restart: on-failure
+    networks:
+      - xflow-network
+
+  xflow-auth-service:
+    build:
+      context: ./services/xflow-auth-service
+    volumes:
+      - ./services/xflow-auth-service:/app
+    ports:
+      - "${AUTH_SERVICE_PORT:-8081}:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/${POSTGRES_DB:-xflow}
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER:-xflow}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD:-xflow}
+      - SPRING_DATASOURCE_DRIVER-CLASS-NAME=org.postgresql.Driver
+    command: ["./mvnw", "spring-boot:run"]
+    depends_on:
+      - postgres
+    networks:
+      - xflow-network
+
+volumes:
+  pgdata:
+
+networks:
+  xflow-network:
