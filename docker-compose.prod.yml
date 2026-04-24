@@ -1,0 +1,22 @@
+services:
+  xflow-api-gateway:
+    build:
+      context: ./services/xflow-api-gateway
+      target: prod
+    volumes:
+      - ./infra/docker/xflow-api-gateway-data:/app/data
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+
+  xflow-auth-service:
+    build:
+      context: ./services/xflow-auth-service
+      target: prod
+    volumes:
+      - ./infra/docker/xflow-auth-service-data:/app/data
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
