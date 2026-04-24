@@ -12,9 +12,14 @@ services:
       timeout: 5s
       retries: 5
       start_period: 60s
+    command: >
+      postgres
+        -c custom.app=${COMPOSE_PROJECT_NAME:-xflow}
+        -c custom.db_password=${POSTGRES_PASSWORD:-xflow}
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
     volumes:
+      - ./infra/docker/sql:/docker-entrypoint-initdb.d
       - pgdata:/var/lib/postgresql/data
     networks:
       - xflow-network
@@ -55,8 +60,8 @@ services:
       - "${AUTH_SERVICE_PORT:-8081}:8080"
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/${POSTGRES_DB:-xflow}
-      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER:-xflow}
-      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD:-xflow}
+      - SPRING_DATASOURCE_USERNAME=auth_${COMPOSE_PROJECT_NAME:-xflow}
+      - SPRING_DATASOURCE_PASSWORD=auth_${POSTGRES_PASSWORD:-xflow}
       - SPRING_DATASOURCE_DRIVER-CLASS-NAME=org.postgresql.Driver
     command: ["./mvnw", "spring-boot:run"]
     depends_on:

@@ -99,7 +99,7 @@ xflow-platform/
 │ ├── xflow-tracking-analytics-service/
 │ ├── xflow-routing-service/
 │ └── xflow-link-notif-service/
-├── below/
+├── infra/
 │ ├── docker/
 │ ├── k8s/
 │ ├── helm/

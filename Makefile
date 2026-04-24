@@ -11,7 +11,7 @@ env := prod
 endif
 
 # Docker Compose command with env files
-DOCKER_COMP=docker compose --env-file .env.$(ENV) --env-file .env
+DOCKER_COMP=docker compose --env-file .env --env-file .env.$(ENV)
 
 # Setup (build images)
 .PHONY: setup
