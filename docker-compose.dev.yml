@@ -11,9 +11,11 @@ services:
     container_name: api-gateway-dev
     environment:
       - SPRING_PROFILES_ACTIVE=${ENV:-dev}
+      - SPRING_DEVTOOLS_RESTART_ENABLED=true
     volumes:
-      - ./:/app
-    working_dir: /app/services/xflow-api-gateway
+      - ./pom.xml:/xflow/pom.xml
+      - ./services/xflow-api-gateway:/xflow/gateway/app
+      - ~/.m2:/root/.m2
 
   xflow-auth-service:
     build:
@@ -21,9 +23,11 @@ services:
     container_name: auth-service-dev
     environment:
       - SPRING_PROFILES_ACTIVE=${ENV:-dev}
+      - SPRING_DEVTOOLS_RESTART_ENABLED=true
     volumes:
-      - ./:/app
-    working_dir: /app/services/xflow-auth-service
+      - ./pom.xml:/xflow/pom.xml
+      - ./services/xflow-auth-service:/xflow/auth/app
+      - ~/.m2:/root/.m2
 
 volumes:
   pgdata:

@@ -45,6 +45,14 @@
 	</properties>
 
 	<dependencies>
+		<!-- Devtools: hot reload in dev -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-devtools</artifactId>
+			<scope>runtime</scope>
+			<optional>true</optional>
+		</dependency>
+		
 		<!-- Web MVC classique (pas WebFlux : auth = synchrone + JPA) -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -65,12 +73,10 @@
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-impl</artifactId>
-			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-jackson</artifactId>
-			<scope>runtime</scope>
 		</dependency>
 
 		<!-- PostgreSQL + JPA -->

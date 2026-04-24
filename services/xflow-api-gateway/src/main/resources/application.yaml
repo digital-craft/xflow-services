@@ -1,3 +1,10 @@
 spring:
   application:
     name: xflow-api-gateway
+  cloud:
+    gateway:
+      routes:
+        - id: auth-service
+          uri: http://xflow-auth-service:8080
+          predicates:
+            - Path=/auth/**

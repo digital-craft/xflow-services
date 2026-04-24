@@ -5,8 +5,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class HelloController {
-    @GetMapping("/")
+    @GetMapping("/auth")
     public String hello() {
-        return "Auth Service is running!";
+        return "Auth Service is running @@@";
     }
 }
