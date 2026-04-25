@@ -13,6 +13,38 @@ endif
 # Docker Compose command with env files
 DOCKER_COMP=docker compose --env-file .env --env-file .env.$(ENV)
 
+# Generate RSA keys and update .env with Base64-encoded values
+.PHONY: generate-keys
+generate-keys:
+	@if [ ! -f .env ]; then \
+		echo "❌ Error: The file .env could not be found. Please create it before continuing."; \
+		exit 1; \
+	fi
+	@mkdir -p infra/keys
+	@if [ ! -f infra/keys/private.pem ]; then \
+		openssl genrsa -out infra/keys/private.pem 2048; \
+		openssl rsa -in infra/keys/private.pem -pubout -out infra/keys/public.pem; \
+		echo "🔑 RSA keys generated in infra/keys."; \
+	else \
+		echo "⚠️  Keys already exist, proceeding with .env update."; \
+	fi
+	$(eval PRIV_B64 := $(shell cat infra/keys/private.pem | base64 | tr -d '\n'))
+	$(eval PUB_B64 := $(shell cat infra/keys/public.pem | base64 | tr -d '\n'))
+	@if ! grep -q "RSA_PRIVATE_KEY" .env; then \
+		echo "" >> .env; \
+		echo "RSA_PRIVATE_KEY=$(PRIV_B64)" >> .env; \
+		echo "✅ Clé privée ajoutée au .env"; \
+	fi
+	@if ! grep -q "RSA_PUBLIC_KEY" .env; then \
+		echo "RSA_PUBLIC_KEY=$(PUB_B64)" >> .env; \
+		echo "✅ Clé publique ajoutée au .env"; \
+	fi
+	@echo "✅ RSA variables added to .env (if they were not already present)."
+
+# Init (initialize environment)
+.PHONY: init
+init: generate-keys
+
 # Setup (build images)
 .PHONY: setup
 build:
