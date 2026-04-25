@@ -1,4 +1,4 @@
-package auth.service.xflow_auth_service.security;
+package auth.service.xflow_auth_service.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
