@@ -64,6 +64,12 @@ services:
       - SPRING_DATASOURCE_PASSWORD=auth_${POSTGRES_PASSWORD:-xflow}
       - SPRING_DATASOURCE_DRIVER-CLASS-NAME=org.postgresql.Driver
     command: ["./mvnw", "spring-boot:run"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     depends_on:
       - postgres
     networks:
