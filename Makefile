@@ -28,16 +28,19 @@ generate-keys:
 	else \
 		echo "⚠️  Keys already exist, proceeding with .env update."; \
 	fi
-	$(eval PRIV_B64 := $(shell cat infra/keys/private.pem | base64 | tr -d '\n'))
-	$(eval PUB_B64 := $(shell cat infra/keys/public.pem | base64 | tr -d '\n'))
-	@if ! grep -q "RSA_PRIVATE_KEY" .env; then \
-		echo "" >> .env; \
-		echo "RSA_PRIVATE_KEY=$(PRIV_B64)" >> .env; \
-		echo "✅ Clé privée ajoutée au .env"; \
-	fi
-	@if ! grep -q "RSA_PUBLIC_KEY" .env; then \
-		echo "RSA_PUBLIC_KEY=$(PUB_B64)" >> .env; \
-		echo "✅ Clé publique ajoutée au .env"; \
+	@PRIV_B64=$$(openssl pkcs8 -topk8 -inform PEM -outform DER -nocrypt -in infra/keys/private.pem | base64 | tr -d '\n'); \
+	PUB_B64=$$(openssl rsa -pubin -inform PEM -outform DER -in infra/keys/public.pem | base64 | tr -d '\n'); \
+	if ! grep -q "RSA_PRIVATE_KEY" .env; then \
+		echo "RSA_PRIVATE_KEY=$$PRIV_B64" >> .env; \
+		echo "✅ RSA_PRIVATE_KEY added to .env"; \
+	else \
+		echo "⚠️  RSA_PRIVATE_KEY already exists in .env, skipping."; \
+	fi; \
+	if ! grep -q "RSA_PUBLIC_KEY" .env; then \
+		echo "RSA_PUBLIC_KEY=$$PUB_B64" >> .env; \
+		echo "✅ RSA_PUBLIC_KEY added to .env"; \
+	else \
+		echo "⚠️  RSA_PUBLIC_KEY already exists in .env, skipping."; \
 	fi
 	@echo "✅ RSA variables added to .env (if they were not already present)."
 

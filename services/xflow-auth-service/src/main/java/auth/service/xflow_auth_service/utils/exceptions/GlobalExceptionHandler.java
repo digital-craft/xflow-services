@@ -1,4 +1,4 @@
-package auth.service.xflow_auth_service.exception;
+package auth.service.xflow_auth_service.utils.exceptions;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

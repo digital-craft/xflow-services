@@ -5,7 +5,7 @@ import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 
 @ConfigurationProperties(prefix = "rsa")
-public record RsaConfig(
+public record RsaKeyConfig(
     RSAPublicKey publicKey,
     RSAPrivateKey privateKey,
     long expirationMs
