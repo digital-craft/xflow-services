@@ -63,6 +63,9 @@ services:
       - SPRING_DATASOURCE_USERNAME=auth_${COMPOSE_PROJECT_NAME:-xflow}
       - SPRING_DATASOURCE_PASSWORD=auth_${POSTGRES_PASSWORD:-xflow}
       - SPRING_DATASOURCE_DRIVER-CLASS-NAME=org.postgresql.Driver
+      - RSA_PRIVATE_KEY=${RSA_PRIVATE_KEY:-}
+      - RSA_PUBLIC_KEY=${RSA_PUBLIC_KEY:-}
+      - EXPIRATION_MS=${EXPIRATION_MS:-3600000}
     command: ["./mvnw", "spring-boot:run"]
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
