@@ -11,7 +11,8 @@ env := prod
 endif
 
 # Docker Compose command with env files
-DOCKER_COMP=docker compose --env-file .env --env-file .env.$(ENV)
+DOCKER_COMP = docker compose --env-file .env --env-file .env.$(ENV)
+MVN = ./mvnw
 
 # Generate RSA keys and update .env with Base64-encoded values
 .PHONY: generate-keys
@@ -64,6 +65,7 @@ logs:
 	$(DOCKER_COMP) logs -f
 
 # Listen logs from a specific container: make logs-c c=<container_name>
+.PHONY: logs-c
 logs-c:
 	$(DOCKER_COMP) logs -f $(c)
 
@@ -80,3 +82,9 @@ down:
 # restart services
 .PHONY: restart
 restart: down dev
+
+# clean mvn target directories (for Java services) for specific container: make clean-c c=<container_name>
+.PHONY: clean-c
+clean-c:
+	$(DOCKER_COMP) exec $(c) $(MVN) clean
+	@echo "✅ Cleaned target directories in container $(c)."

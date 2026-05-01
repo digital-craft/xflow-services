@@ -66,6 +66,8 @@ services:
       - RSA_PRIVATE_KEY=${RSA_PRIVATE_KEY:-}
       - RSA_PUBLIC_KEY=${RSA_PUBLIC_KEY:-}
       - EXPIRATION_MS=${EXPIRATION_MS:-3600000}
+      - AUTH_MAX_FAILED_ATTEMPTS=${AUTH_MAX_FAILED_ATTEMPTS:-3}
+      - AUTH_LOCKOUT_DURATION_MS=${AUTH_LOCKOUT_DURATION_MS:-3600000}
     command: ["./mvnw", "spring-boot:run"]
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
