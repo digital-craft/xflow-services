@@ -27,6 +27,9 @@ public class User extends DateBaseModel {
     @Column(name = "password_hash", nullable = false)
     private String password;
 
+    @Column(name = "pin_hash")
+    private String pin;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private UserRole role;

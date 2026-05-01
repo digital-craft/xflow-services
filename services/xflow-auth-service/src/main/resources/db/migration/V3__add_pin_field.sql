@@ -1,0 +1,1 @@
+ALTER TABLE auth.users ADD COLUMN pin_hash VARCHAR(255);
