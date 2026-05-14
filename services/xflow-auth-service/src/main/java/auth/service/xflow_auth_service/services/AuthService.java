@@ -29,6 +29,7 @@ public class AuthService {
     private final RsaKeyConfig rsaKeyConfig;
     private final LoginAttemptService loginAttemptService;
     private final AnonymousTokenRepository anonymousTokenRepository;
+    private final AnonymousRateLimiter anonymousLimiter;
 
     @Transactional
     public LoginResponse login(LoginRequest request) {
@@ -77,17 +78,21 @@ public class AuthService {
         );
     }
 
-    // @Transactional
-    // public LoginResponse loginAnonymous() {
-    //     AnonymousToken token = new AnonymousToken();
-    //     token.setToken(jwtService.generateToken(new User(null, null, null, UserRole.ROLE_PARTICIPANT, null, null)));
-    //     token.setExpiresAt(OffsetDateTime.now().plusMillis(rsaKeyConfig.expirationMs()));
-    //     anonymousTokenRepository.save(token);
-    //     return new LoginResponse(
-    //             token.getToken(),
-    //             "Bearer",
-    //             UserRole.ROLE_PARTICIPANT.name(),
-    //             rsaKeyConfig.expirationMs()
-    //     );
-    // }
+    @Transactional
+    public LoginResponse loginAnonymous(String fingerprint) {
+        if (!anonymousLimiter.isAllowed(fingerprint)) {
+            throw new LockedException("too-many-attempts");
+        }
+        AnonymousToken tokenEntity = new AnonymousToken();
+        tokenEntity.setExpiresAt(OffsetDateTime.now().plusHours(rsaKeyConfig.expirationMs()));
+        AnonymousToken savedToken = anonymousTokenRepository.save(tokenEntity);
+        anonymousLimiter.recordAttempt(fingerprint);
+        String jwt = jwtService.generateAnonymousToken(savedToken.getId().toString(), "PARTICIPANT");
+        return new LoginResponse(
+                jwt,
+                "Bearer",
+                "PARTICIPANT",
+                rsaKeyConfig.expirationMs()
+        );
+    }
 }

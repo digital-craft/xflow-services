@@ -17,7 +17,7 @@ services:
         -c custom.app=${COMPOSE_PROJECT_NAME:-xflow}
         -c custom.db_password=${POSTGRES_PASSWORD:-xflow}
     ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+      - ${POSTGRES_PORT_EXT:-5432}:5432
     volumes:
       - ./infra/docker/sql:/docker-entrypoint-initdb.d
       - pgdata:/var/lib/postgresql/data
@@ -28,7 +28,7 @@ services:
     image: redis:7-alpine
     container_name: redis
     ports:
-      - "${REDIS_PORT:-6379}:6379"
+      - ${REDIS_PORT:-6379}:6379
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -43,7 +43,7 @@ services:
     volumes:
       - ~/.m2:/root/.m2
     ports:
-      - "${API_GATEWAY_PORT:-8080}:8080"
+      - ${API_GATEWAY_PORT:-8080}:8080
     command: ["./mvnw", "spring-boot:run"]
     depends_on:
       - xflow-auth-service
@@ -57,17 +57,21 @@ services:
     volumes:
       - ~/.m2:/root/.m2
     ports:
-      - "${AUTH_SERVICE_PORT:-8081}:8080"
+      - ${AUTH_SERVICE_PORT:-8081}:8080
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/${POSTGRES_DB:-xflow}
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:${POSTGRES_PORT:-5432}/${POSTGRES_DB:-xflow}
       - SPRING_DATASOURCE_USERNAME=auth_${COMPOSE_PROJECT_NAME:-xflow}
       - SPRING_DATASOURCE_PASSWORD=auth_${POSTGRES_PASSWORD:-xflow}
       - SPRING_DATASOURCE_DRIVER-CLASS-NAME=org.postgresql.Driver
+      - REDIS_HOST=redis
+      - REDIS_PORT=${REDIS_PORT:-6379}
       - RSA_PRIVATE_KEY=${RSA_PRIVATE_KEY:-}
       - RSA_PUBLIC_KEY=${RSA_PUBLIC_KEY:-}
       - EXPIRATION_MS=${EXPIRATION_MS:-3600000}
       - AUTH_MAX_FAILED_ATTEMPTS=${AUTH_MAX_FAILED_ATTEMPTS:-3}
       - AUTH_LOCKOUT_DURATION_MS=${AUTH_LOCKOUT_DURATION_MS:-3600000}
+      - AUTH_ANON_MAX_ATTEMPTS=${AUTH_ANON_MAX_ATTEMPTS:-5}
+      - AUTH_ANON_LOCKOUT_DURATION_MS=${AUTH_ANON_LOCKOUT_DURATION_MS:-3600000}
     command: ["./mvnw", "spring-boot:run"]
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]

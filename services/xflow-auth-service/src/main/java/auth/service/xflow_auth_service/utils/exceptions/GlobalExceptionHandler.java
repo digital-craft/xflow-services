@@ -15,27 +15,34 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ErrorResponse> handleBadCredentials(BadCredentialsException ex) {
+        String message = (ex.getMessage() != null && !ex.getMessage().isEmpty())
+                        ? ex.getMessage() : "invalid-credentials";
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-            .body(new ErrorResponse("invalid-credentials", System.currentTimeMillis(), 401));
+            .body(new ErrorResponse(message, System.currentTimeMillis(), 401));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        String message = ex.getBindingResult().getFieldErrors().get(0).getDefaultMessage();
+        String message = (ex.getMessage() != null && !ex.getMessage().isEmpty())
+                        ? ex.getMessage() : "bad-request";
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-            .body(new ErrorResponse("bad-request", System.currentTimeMillis(), 400));
+            .body(new ErrorResponse(message, System.currentTimeMillis(), 400));
     }
 
     @ExceptionHandler(LockedException.class)
     public ResponseEntity<ErrorResponse> handleLockedException(LockedException ex) {
+        String message = (ex.getMessage() != null && !ex.getMessage().isEmpty())
+                        ? ex.getMessage() : "too-many-attempts";
         return ResponseEntity.status(HttpStatus.LOCKED)
-            .body(new ErrorResponse("too-many-attempts", System.currentTimeMillis(), 423));
+            .body(new ErrorResponse(message, System.currentTimeMillis(), 423));
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGlobalException(Exception ex) {
+        String message = (ex.getMessage() != null && !ex.getMessage().isEmpty())
+                        ? ex.getMessage() : "internal-server-error";
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-            .body(new ErrorResponse("internal-server-error", System.currentTimeMillis(), 500));
+            .body(new ErrorResponse(message, System.currentTimeMillis(), 500));
     }
 
 }
