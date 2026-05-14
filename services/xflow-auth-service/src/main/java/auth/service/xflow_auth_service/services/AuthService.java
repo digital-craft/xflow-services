@@ -6,8 +6,10 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import auth.service.xflow_auth_service.models.User;
+import auth.service.xflow_auth_service.models.AnonymousToken;
 import auth.service.xflow_auth_service.models.enums.UserRole;
 import auth.service.xflow_auth_service.repositories.UserRepository;
+import auth.service.xflow_auth_service.repositories.AnonymousTokenRepository;
 import auth.service.xflow_auth_service.dao.LoginRequest;
 import auth.service.xflow_auth_service.dao.OperatorPinRequest;
 import auth.service.xflow_auth_service.dto.LoginResponse;
@@ -26,6 +28,8 @@ public class AuthService {
     private final JwtService jwtService;
     private final RsaKeyConfig rsaKeyConfig;
     private final LoginAttemptService loginAttemptService;
+    private final AnonymousTokenRepository anonymousTokenRepository;
+    private final AnonymousRateLimiter anonymousLimiter;
 
     @Transactional
     public LoginResponse login(LoginRequest request) {
@@ -70,6 +74,24 @@ public class AuthService {
                 token,
                 "Bearer",
                 user.getRole().name(),
+                rsaKeyConfig.expirationMs()
+        );
+    }
+
+    @Transactional
+    public LoginResponse loginAnonymous(String fingerprint) {
+        if (!anonymousLimiter.isAllowed(fingerprint)) {
+            throw new LockedException("too-many-attempts");
+        }
+        AnonymousToken tokenEntity = new AnonymousToken();
+        tokenEntity.setExpiresAt(OffsetDateTime.now().plusHours(rsaKeyConfig.expirationMs()));
+        AnonymousToken savedToken = anonymousTokenRepository.save(tokenEntity);
+        anonymousLimiter.recordAttempt(fingerprint);
+        String jwt = jwtService.generateAnonymousToken(savedToken.getId().toString(), "PARTICIPANT");
+        return new LoginResponse(
+                jwt,
+                "Bearer",
+                "PARTICIPANT",
                 rsaKeyConfig.expirationMs()
         );
     }

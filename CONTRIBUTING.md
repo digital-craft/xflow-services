@@ -49,12 +49,11 @@
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/xflow-platform/xflow-platform.git
-cd xflow-platform
+git clone https://github.com/digital-craft/xflow-services
+cd xflow-services
 
-# 2. Generate RSA keys for JWT (first time only)
-make keys
-# → Copy JWT_PRIVATE_KEY and JWT_PUBLIC_KEY into .env
+# 2. Initialize the project: generate RSA keys for JWT (first time only)
+make init
 
 # 3. Configure the local environment
 cp .env.example .env
@@ -66,7 +65,7 @@ make build
 
 # 5. Start the full stack
 make dev
-# → API available at http://localhost:8080
+# → APIs available at http://localhost:8080
 ```
 
 ### Available Makefile Commands
@@ -77,21 +76,17 @@ make down # Stop the stack
 make build # Build Maven + Docker
 make restart # down + build + up
 make logs # Logs of all services
-make auth-logs # Logs of the auth-service only
-make gateway-logs # Logs of the api-gateway only
+make logs-c <container> # Logs for a specific service
 make ps # Status of containers
-make test # All Maven tests
-make test-auth # Tests of the auth-service only
-make test-gateway # Tests of the api-gateway only
-make keys # Generate RSA JWT keys
-make clean # Delete volumes + builds
+make generate-keys # Generate RSA JWT keys
+make clean-c <container> # Clean maven dependencies for specific container
 
 ```
 
 ### Monorepo Structure
 
 ```
-xflow-platform/
+xflow-services/
 ├── services/
 │ ├── xflow-api-gateway/
 │ ├── xflow-auth-service/
@@ -774,7 +769,7 @@ Ouvrir une **GitHub Issue** avec le template `Bug Report` :
 ## Questions ?
 
 - **Slack / Discord** : canal `#xflow-dev`
-- **Discussions GitHub** : [github.com/xflow-platform/xflow-platform/discussions](https://github.com/xflow-platform/xflow-platform/discussions)
+- **Discussions GitHub** : [github.com/digital-craft/xflow-services/discussions](https://github.com/digital-craft/xflow-services/discussions)
 - **Email** : contribute@xflow.io
 
 ---

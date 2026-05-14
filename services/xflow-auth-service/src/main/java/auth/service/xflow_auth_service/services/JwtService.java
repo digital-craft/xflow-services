@@ -29,4 +29,15 @@ public class JwtService {
             .compact();
     }
 
+    public String generateAnonymousToken(String anonymousId, String role) {
+        Instant now = Instant.now();
+        return Jwts.builder()
+            .subject(anonymousId)
+            .claim("role", role)
+            .issuedAt(Date.from(now))
+            .expiration(Date.from(now.plusMillis(rsaKeyConfig.expirationMs())))
+            .signWith(rsaKeyConfig.privateKey())
+            .compact();
+    }
+
 }

@@ -22,6 +22,7 @@ services:
       target: dev
     container_name: auth-service-dev
     environment:
+      - REDIS_HOST=redis-dev
       - SPRING_PROFILES_ACTIVE=${ENV:-dev}
       - SPRING_DEVTOOLS_RESTART_ENABLED=true
     volumes:
