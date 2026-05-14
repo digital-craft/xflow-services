@@ -1,7 +1,6 @@
 # Makefile for xflow-services: setup, launch, monitor, inspect containers (dev/prod)
 
 -include .env
--include .env.local
 
 # Load ENV from .env (default to 'dev' if not set)
 ifdef ENV
@@ -60,7 +59,7 @@ dev:
 	$(DOCKER_COMP) up -d
 
 # Monitor (logs)
-.PHONY: logs logs-c
+.PHONY: logs
 logs:
 	$(DOCKER_COMP) logs -f
 
@@ -81,7 +80,7 @@ down:
 
 # restart services
 .PHONY: restart
-restart: down dev
+restart: down build dev
 
 # clean mvn target directories (for Java services) for specific container: make clean-c c=<container_name>
 .PHONY: clean-c

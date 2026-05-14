@@ -30,4 +30,9 @@ public class AuthController {
     public ResponseEntity<LoginResponse> loginOperator(@Valid @RequestBody OperatorPinRequest request) {
         return ResponseEntity.ok(authService.loginOperator(request));
     }
+
+    // @PostMapping("/anonymous/login")
+    // public ResponseEntity<LoginResponse> loginAnonymous() {
+    //     return ResponseEntity.ok(authService.loginAnonymous(request));
+    // }
 }
