@@ -6,12 +6,15 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import auth.service.xflow_auth_service.models.User;
+import auth.service.xflow_auth_service.models.RefreshToken;
 import auth.service.xflow_auth_service.models.AnonymousToken;
 import auth.service.xflow_auth_service.models.enums.UserRole;
 import auth.service.xflow_auth_service.repositories.UserRepository;
 import auth.service.xflow_auth_service.repositories.AnonymousTokenRepository;
+import auth.service.xflow_auth_service.repositories.RefreshTokenRepository;
 import auth.service.xflow_auth_service.dao.LoginRequest;
 import auth.service.xflow_auth_service.dao.OperatorPinRequest;
+import auth.service.xflow_auth_service.dao.RefreshTokenRequest;
 import auth.service.xflow_auth_service.dto.LoginResponse;
 import auth.service.xflow_auth_service.config.RsaKeyConfig;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +33,8 @@ public class AuthService {
     private final LoginAttemptService loginAttemptService;
     private final AnonymousTokenRepository anonymousTokenRepository;
     private final AnonymousRateLimiter anonymousLimiter;
+    private final RefreshTokenRepository refreshTokenRepository;
+    private final RefreshTokenService refreshTokenService;
 
     @Transactional
     public LoginResponse login(LoginRequest request) {
@@ -46,8 +51,10 @@ public class AuthService {
         user.setLastLoginAt(OffsetDateTime.now());
         userRepository.save(user);
         String token = jwtService.generateToken(user);
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getId());
         return new LoginResponse(
             token,
+            refreshToken.getToken(),
             "Bearer",
             user.getRole().name(),
             rsaKeyConfig.expirationMs()
@@ -70,8 +77,10 @@ public class AuthService {
         user.setLastLoginAt(OffsetDateTime.now());
         userRepository.save(user);
         String token = jwtService.generateToken(user);
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getId());
         return new LoginResponse(
                 token,
+                refreshToken.getToken(),
                 "Bearer",
                 user.getRole().name(),
                 rsaKeyConfig.expirationMs()
@@ -90,9 +99,29 @@ public class AuthService {
         String jwt = jwtService.generateAnonymousToken(savedToken.getId().toString(), "PARTICIPANT");
         return new LoginResponse(
                 jwt,
+                "",
                 "Bearer",
                 "PARTICIPANT",
                 rsaKeyConfig.expirationMs()
         );
+    }
+
+    @Transactional
+    public LoginResponse refreshToken(RefreshTokenRequest request) {
+        String requestToken = request.refreshToken();
+        return refreshTokenRepository.findByToken(requestToken)
+                .map(refreshTokenService::verifyExpiration)
+                .map(token -> {
+                    User user = token.getUser();
+                    String accessToken = jwtService.generateToken(user);
+                    return new LoginResponse(
+                        accessToken,
+                        requestToken,
+                        "Bearer",
+                        user.getRole().name(), 
+                        rsaKeyConfig.expirationMs()
+                    );
+                })
+                .orElseThrow(() -> new BadCredentialsException("unknown-token"));
     }
 }

@@ -72,6 +72,7 @@ services:
       - AUTH_LOCKOUT_DURATION_MS=${AUTH_LOCKOUT_DURATION_MS:-3600000}
       - AUTH_ANON_MAX_ATTEMPTS=${AUTH_ANON_MAX_ATTEMPTS:-5}
       - AUTH_ANON_LOCKOUT_DURATION_MS=${AUTH_ANON_LOCKOUT_DURATION_MS:-3600000}
+      - REFRESH_EXPIRATION_MS=${REFRESH_EXPIRATION_MS:-8640000000}
     command: ["./mvnw", "spring-boot:run"]
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]

@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import auth.service.xflow_auth_service.services.AuthService;
 import auth.service.xflow_auth_service.dao.LoginRequest;
 import auth.service.xflow_auth_service.dao.OperatorPinRequest;
+import auth.service.xflow_auth_service.dao.RefreshTokenRequest;
 import auth.service.xflow_auth_service.dto.LoginResponse;
 
 
@@ -38,5 +39,10 @@ public class AuthController {
         String userAgent = request.getHeader("User-Agent");
         String fingerprint = ip + "|" + (userAgent != null ? userAgent : "unknown");
         return ResponseEntity.ok(authService.loginAnonymous(fingerprint));
+    }
+    
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refreshToken(@RequestBody RefreshTokenRequest request) {
+        return ResponseEntity.ok(authService.refreshToken(request));
     }
 }
