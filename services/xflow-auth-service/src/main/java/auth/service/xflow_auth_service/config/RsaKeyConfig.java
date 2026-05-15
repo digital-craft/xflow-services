@@ -8,6 +8,7 @@ import java.security.interfaces.RSAPublicKey;
 public record RsaKeyConfig(
     RSAPublicKey publicKey,
     RSAPrivateKey privateKey,
-    long expirationMs
+    long expirationMs,
+    long refreshExpirationMs
 ) {
 }
