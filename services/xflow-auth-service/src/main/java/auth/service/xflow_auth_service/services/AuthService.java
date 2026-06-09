@@ -15,7 +15,9 @@ import auth.service.xflow_auth_service.repositories.RefreshTokenRepository;
 import auth.service.xflow_auth_service.dao.LoginRequest;
 import auth.service.xflow_auth_service.dao.OperatorPinRequest;
 import auth.service.xflow_auth_service.dao.RefreshTokenRequest;
+import auth.service.xflow_auth_service.dao.LogoutRequest;
 import auth.service.xflow_auth_service.dto.LoginResponse;
+import auth.service.xflow_auth_service.dto.LogoutResponse;
 import auth.service.xflow_auth_service.config.RsaKeyConfig;
 import lombok.RequiredArgsConstructor;
 
@@ -123,5 +125,16 @@ public class AuthService {
                     );
                 })
                 .orElseThrow(() -> new BadCredentialsException("unknown-token"));
+    }
+    
+    @Transactional
+    public LogoutResponse logout(LogoutRequest request) {
+        String requestToken = request.refreshToken();
+        return refreshTokenRepository.findByToken(requestToken)
+            .map(token -> {
+                    refreshTokenRepository.delete(token);
+                    return new LogoutResponse("logout-success");
+            })
+            .orElseThrow(() -> new BadCredentialsException("unknown-token"));
     }
 }
