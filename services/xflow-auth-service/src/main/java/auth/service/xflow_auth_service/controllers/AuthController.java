@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 
 import auth.service.xflow_auth_service.services.AuthService;
 import auth.service.xflow_auth_service.dao.LoginRequest;
+import auth.service.xflow_auth_service.dao.LogoutRequest;
 import auth.service.xflow_auth_service.dao.OperatorPinRequest;
 import auth.service.xflow_auth_service.dao.RefreshTokenRequest;
 import auth.service.xflow_auth_service.dto.LoginResponse;
@@ -44,5 +45,10 @@ public class AuthController {
     @PostMapping("/refresh")
     public ResponseEntity<?> refreshToken(@RequestBody RefreshTokenRequest request) {
         return ResponseEntity.ok(authService.refreshToken(request));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(@Valid @RequestBody LogoutRequest request) {
+        return ResponseEntity.ok(authService.logout(request));
     }
 }
