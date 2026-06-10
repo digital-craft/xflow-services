@@ -41,6 +41,25 @@ public class UserService {
         );
     }
 
+    @Transactional
+    public CreateOperatorResponse regenerateOperatorCredentials(UUID id) {
+        if (!userRepository.existsById(id)) {
+            throw new RuntimeException("operator-not-found");
+        }
+        String rawPassword = generateRandomPassword();
+        String rawPin = generateRandomPin();
+        User operator = userRepository.findById(id).orElseThrow(() -> new RuntimeException("operator-not-found"));
+        operator.setPassword(passwordEncoder.encode(rawPassword));
+        operator.setPin(passwordEncoder.encode(rawPin));
+        userRepository.save(operator);
+        // sendCredentialsEmail(request.email(), rawPassword, rawPin);
+        return new CreateOperatorResponse(
+            operator.getEmail(),
+            operator.getRole().name(),
+            System.currentTimeMillis()
+        );
+    }
+
     private String generateRandomPassword() {
         return UUID.randomUUID().toString().substring(0, 12);
     }

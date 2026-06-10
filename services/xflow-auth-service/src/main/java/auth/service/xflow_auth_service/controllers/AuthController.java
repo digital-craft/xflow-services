@@ -13,7 +13,7 @@ import lombok.RequiredArgsConstructor;
 import auth.service.xflow_auth_service.services.AuthService;
 import auth.service.xflow_auth_service.dao.LoginRequest;
 import auth.service.xflow_auth_service.dao.LogoutRequest;
-import auth.service.xflow_auth_service.dao.OperatorPinRequest;
+import auth.service.xflow_auth_service.dao.LoginPinRequest;
 import auth.service.xflow_auth_service.dao.RefreshTokenRequest;
 import auth.service.xflow_auth_service.dto.LoginResponse;
 import auth.service.xflow_auth_service.dto.ApiResponse;
@@ -31,7 +31,7 @@ public class AuthController {
     }
 
     @PostMapping("/login/operator")
-    public ResponseEntity<ApiResponse<LoginResponse>> loginOperator(@Valid @RequestBody OperatorPinRequest request) {
+    public ResponseEntity<ApiResponse<LoginResponse>> loginOperator(@Valid @RequestBody LoginPinRequest request) {
         return ResponseEntity.ok(new ApiResponse<>("operator-logged-in", authService.loginOperator(request)));
     }
 

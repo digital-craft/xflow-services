@@ -13,7 +13,7 @@ import auth.service.xflow_auth_service.repositories.UserRepository;
 import auth.service.xflow_auth_service.repositories.AnonymousTokenRepository;
 import auth.service.xflow_auth_service.repositories.RefreshTokenRepository;
 import auth.service.xflow_auth_service.dao.LoginRequest;
-import auth.service.xflow_auth_service.dao.OperatorPinRequest;
+import auth.service.xflow_auth_service.dao.LoginPinRequest;
 import auth.service.xflow_auth_service.dao.RefreshTokenRequest;
 import auth.service.xflow_auth_service.dao.LogoutRequest;
 import auth.service.xflow_auth_service.dto.LoginResponse;
@@ -63,7 +63,7 @@ public class AuthService {
     }
 
     @Transactional
-    public LoginResponse loginOperator(OperatorPinRequest request) {
+    public LoginResponse loginOperator(LoginPinRequest request) {
         List<User> users = userRepository.findAllByRole(UserRole.ROLE_OPERATOR);
         User user = users.stream()
             .filter(
