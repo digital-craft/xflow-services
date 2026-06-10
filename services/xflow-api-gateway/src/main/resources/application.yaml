@@ -8,3 +8,7 @@ spring:
           uri: http://xflow-auth-service:8080
           predicates:
             - Path=/auth/**
+        - id: auth-users
+          uri: http://xflow-auth-service:8080
+          predicates:
+            - Path=/users/**

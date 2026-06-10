@@ -16,6 +16,7 @@ import auth.service.xflow_auth_service.dao.LogoutRequest;
 import auth.service.xflow_auth_service.dao.OperatorPinRequest;
 import auth.service.xflow_auth_service.dao.RefreshTokenRequest;
 import auth.service.xflow_auth_service.dto.LoginResponse;
+import auth.service.xflow_auth_service.dto.ApiResponse;
 
 
 @RestController
@@ -25,30 +26,31 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
-        return ResponseEntity.ok(authService.login(request));
+    public ResponseEntity<ApiResponse<LoginResponse>> login(@Valid @RequestBody LoginRequest request) {
+        return ResponseEntity.ok(new ApiResponse<>("logged-in", authService.login(request)));
     }
 
     @PostMapping("/login/operator")
-    public ResponseEntity<LoginResponse> loginOperator(@Valid @RequestBody OperatorPinRequest request) {
-        return ResponseEntity.ok(authService.loginOperator(request));
+    public ResponseEntity<ApiResponse<LoginResponse>> loginOperator(@Valid @RequestBody OperatorPinRequest request) {
+        return ResponseEntity.ok(new ApiResponse<>("operator-logged-in", authService.loginOperator(request)));
     }
 
     @PostMapping("/login/anonymous")
-    public ResponseEntity<LoginResponse> loginAnonymous(HttpServletRequest request) {
+    public ResponseEntity<ApiResponse<LoginResponse>> loginAnonymous(HttpServletRequest request) {
         String ip = request.getRemoteAddr();
         String userAgent = request.getHeader("User-Agent");
         String fingerprint = ip + "|" + (userAgent != null ? userAgent : "unknown");
-        return ResponseEntity.ok(authService.loginAnonymous(fingerprint));
+        return ResponseEntity.ok(new ApiResponse<>("anonymous-logged-in", authService.loginAnonymous(fingerprint)));
     }
     
     @PostMapping("/refresh")
-    public ResponseEntity<?> refreshToken(@RequestBody RefreshTokenRequest request) {
-        return ResponseEntity.ok(authService.refreshToken(request));
+    public ResponseEntity<ApiResponse<Object>> refreshToken(@RequestBody RefreshTokenRequest request) {
+        return ResponseEntity.ok(new ApiResponse<>("token-refreshed", authService.refreshToken(request)));
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(@Valid @RequestBody LogoutRequest request) {
-        return ResponseEntity.ok(authService.logout(request));
+    public ResponseEntity<ApiResponse<Object>> logout(@Valid @RequestBody LogoutRequest request) {
+        authService.logout(request);
+        return ResponseEntity.ok(new ApiResponse<>("logged-out", null));
     }
 }
