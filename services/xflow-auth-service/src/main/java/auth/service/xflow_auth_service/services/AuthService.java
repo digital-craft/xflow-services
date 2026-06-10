@@ -16,13 +16,18 @@ import auth.service.xflow_auth_service.dao.LoginRequest;
 import auth.service.xflow_auth_service.dao.LoginPinRequest;
 import auth.service.xflow_auth_service.dao.RefreshTokenRequest;
 import auth.service.xflow_auth_service.dao.LogoutRequest;
+import auth.service.xflow_auth_service.dao.ChangePasswordRequest;
+import auth.service.xflow_auth_service.dao.ChangePinRequest;
 import auth.service.xflow_auth_service.dto.LoginResponse;
+import auth.service.xflow_auth_service.dto.CreateOperatorResponse;
 import auth.service.xflow_auth_service.config.RsaKeyConfig;
+import auth.service.xflow_auth_service.utils.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 
 import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -36,6 +41,7 @@ public class AuthService {
     private final AnonymousRateLimiter anonymousLimiter;
     private final RefreshTokenRepository refreshTokenRepository;
     private final RefreshTokenService refreshTokenService;
+    private final SecurityUtils securityUtils;
 
     @Transactional
     public LoginResponse login(LoginRequest request) {
@@ -124,6 +130,70 @@ public class AuthService {
                     );
                 })
                 .orElseThrow(() -> new BadCredentialsException("unknown-token"));
+    }
+
+    @Transactional
+    public CreateOperatorResponse regenerateOperatorCredentials(UUID id) {
+        if (!userRepository.existsById(id)) {
+            throw new RuntimeException("operator-not-found");
+        }
+        String rawPassword = securityUtils.generateRandomPassword();
+        String rawPin = securityUtils.generateRandomPin();
+        User operator = userRepository.findById(id).orElseThrow(() -> new RuntimeException("operator-not-found"));
+        operator.setPassword(passwordEncoder.encode(rawPassword));
+        operator.setPin(passwordEncoder.encode(rawPin));
+        operator.setPasswordChanged(false);
+        operator.setPinChanged(false);
+        userRepository.save(operator);
+        securityUtils.sendCredentialsEmail(operator.getEmail(), rawPassword, rawPin);
+        return new CreateOperatorResponse(
+            operator.getId(),
+            operator.getEmail(),
+            operator.getRole().name(),
+            operator.isActive(),
+            System.currentTimeMillis()
+        );
+    }
+
+    @Transactional
+    public CreateOperatorResponse changePassword(String email, ChangePasswordRequest request) {
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("user-not-found"));
+        if (!passwordEncoder.matches(request.oldPassword(), user.getPassword())) {
+            throw new RuntimeException("invalid-old-password");
+        }
+        user.setPassword(passwordEncoder.encode(request.newPassword()));
+        user.setPasswordChanged(true);
+        userRepository.save(user);
+        refreshTokenRepository.deleteByUserId(user.getId());
+        return new CreateOperatorResponse(
+            user.getId(),
+            user.getEmail(),
+            user.getRole().name(),
+            user.isActive(),
+            System.currentTimeMillis()
+        );
+    }
+
+    @Transactional
+    public CreateOperatorResponse changePin(String email, ChangePinRequest request) {
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("user-not-found"));
+        if (!passwordEncoder.matches(request.oldPin(), user.getPin())) {
+            throw new RuntimeException("invalid-old-pin");
+        }
+        if (user.getRole() != UserRole.ROLE_OPERATOR) {
+            throw new RuntimeException("only-operator-can-change-pin");
+        }
+        user.setPin(passwordEncoder.encode(request.newPin()));
+        user.setPinChanged(true);
+        userRepository.save(user);
+        refreshTokenRepository.deleteByUserId(user.getId());
+        return new CreateOperatorResponse(
+            user.getId(),
+            user.getEmail(),
+            user.getRole().name(),
+            user.isActive(),
+            System.currentTimeMillis()
+        );
     }
     
     @Transactional

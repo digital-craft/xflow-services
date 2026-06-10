@@ -1,11 +1,7 @@
 package auth.service.xflow_auth_service.models;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
+import lombok.*;
 import auth.service.xflow_auth_service.models.enums.UserRole;
 import auth.service.xflow_auth_service.models.bases.DateBaseModel;
 
@@ -38,6 +34,14 @@ public class User extends DateBaseModel {
     @Column(name = "is_active", nullable = false)
     @Builder.Default
     private boolean active = false;
+
+    @Column(name = "is_password_changed", nullable = false)
+    @Builder.Default
+    private boolean passwordChanged = false;
+
+    @Column(name = "is_pin_changed", nullable = false)
+    @Builder.Default
+    private boolean pinChanged = false;
 
     @Column(name = "last_login_at")
     private OffsetDateTime lastLoginAt;

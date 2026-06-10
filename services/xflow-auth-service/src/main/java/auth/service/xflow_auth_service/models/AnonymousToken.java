@@ -1,10 +1,7 @@
 package auth.service.xflow_auth_service.models;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
+import lombok.*;
 import auth.service.xflow_auth_service.models.enums.UserRole;
 import auth.service.xflow_auth_service.models.bases.DateBaseModel;
 
@@ -13,7 +10,7 @@ import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "anonymous_token", schema = "auth")
-@Getter @Setter
+@Getter @Setter @Builder
 @NoArgsConstructor @AllArgsConstructor
 public class AnonymousToken extends DateBaseModel {
     

@@ -33,17 +33,6 @@ public class UserController {
         return ResponseEntity.ok(new ApiResponse<>("operator-created", userService.createOperator(request)));
     }
 
-    @PutMapping("/operator/{id}/regenerate-credentials")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<ApiResponse<CreateOperatorResponse>> regenerateOperatorCredentials(
-        @PathVariable UUID id
-    ) {
-        return ResponseEntity.ok(new ApiResponse<>(
-            "operator-credentials-regenerated",
-            userService.regenerateOperatorCredentials(id))
-        );
-    }   
-
     @PutMapping("/operator/{id}/toggle-active-status")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ApiResponse<CreateOperatorResponse>> toggleOperatorActiveStatus(

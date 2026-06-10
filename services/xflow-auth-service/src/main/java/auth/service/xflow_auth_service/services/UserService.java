@@ -8,9 +8,9 @@ import auth.service.xflow_auth_service.dao.CreateOperatorRequest;
 import auth.service.xflow_auth_service.dto.CreateOperatorResponse;
 import auth.service.xflow_auth_service.models.User;
 import auth.service.xflow_auth_service.models.enums.UserRole;
+import auth.service.xflow_auth_service.utils.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 
-import java.security.SecureRandom;
 import java.util.UUID;
 
 @Service
@@ -18,14 +18,15 @@ import java.util.UUID;
 public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final SecurityUtils securityUtils;
     
     @Transactional
     public CreateOperatorResponse createOperator(CreateOperatorRequest request) {
         if (userRepository.existsByEmail(request.email())) {
             throw new RuntimeException("email-already-in-use");
         }
-        String rawPassword = generateRandomPassword();
-        String rawPin = generateRandomPin();
+        String rawPassword = securityUtils.generateRandomPassword();
+        String rawPin = securityUtils.generateRandomPin();
         User operator = User.builder()
             .email(request.email())
             .password(passwordEncoder.encode(rawPassword))
@@ -33,28 +34,7 @@ public class UserService {
             .role(UserRole.ROLE_OPERATOR)
             .build();
         userRepository.save(operator);
-        sendCredentialsEmail(operator.getEmail(), rawPassword, rawPin);
-        return new CreateOperatorResponse(
-            operator.getId(),
-            operator.getEmail(),
-            operator.getRole().name(),
-            operator.isActive(),
-            System.currentTimeMillis()
-        );
-    }
-
-    @Transactional
-    public CreateOperatorResponse regenerateOperatorCredentials(UUID id) {
-        if (!userRepository.existsById(id)) {
-            throw new RuntimeException("operator-not-found");
-        }
-        String rawPassword = generateRandomPassword();
-        String rawPin = generateRandomPin();
-        User operator = userRepository.findById(id).orElseThrow(() -> new RuntimeException("operator-not-found"));
-        operator.setPassword(passwordEncoder.encode(rawPassword));
-        operator.setPin(passwordEncoder.encode(rawPin));
-        userRepository.save(operator);
-        sendCredentialsEmail(operator.getEmail(), rawPassword, rawPin);
+        securityUtils.sendCredentialsEmail(operator.getEmail(), rawPassword, rawPin);
         return new CreateOperatorResponse(
             operator.getId(),
             operator.getEmail(),
@@ -82,23 +62,5 @@ public class UserService {
             operator.isActive(),
             System.currentTimeMillis()
         );
-    }
-
-    private String generateRandomPassword() {
-        return UUID.randomUUID().toString().substring(0, 12);
-    }
-
-    private String generateRandomPin() {
-        SecureRandom random = new SecureRandom();
-        int num = random.nextInt(900000) + 100000;
-        return String.valueOf(num);
-    }
-
-    private void sendCredentialsEmail(String email, String password, String pin) {
-        System.out.println("----------------------------------------------------------------");
-        System.out.println("SENDING EMAIL (MOCK) to : " + email);
-        System.out.println("Your temporary password : " + password);
-        System.out.println("Your quick login PIN : " + pin);
-        System.out.println("----------------------------------------------------------------");
     }
 }

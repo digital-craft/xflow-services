@@ -10,8 +10,8 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "refresh_token", schema = "auth")
-@Getter @Setter
-@NoArgsConstructor @AllArgsConstructor @Builder
+@Getter @Setter @Builder
+@NoArgsConstructor @AllArgsConstructor
 public class RefreshToken extends DateBaseModel {
 
     @Id
