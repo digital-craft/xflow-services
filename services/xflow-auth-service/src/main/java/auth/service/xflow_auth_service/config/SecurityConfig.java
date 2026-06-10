@@ -12,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import auth.service.xflow_auth_service.config.filters.JwtAuthenticationFilter;
+import auth.service.xflow_auth_service.config.filters.ClientIpFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -19,6 +20,7 @@ import auth.service.xflow_auth_service.config.filters.JwtAuthenticationFilter;
 @RequiredArgsConstructor
 public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthFilter;
+    private final ClientIpFilter clientIpFilter;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -30,7 +32,8 @@ public class SecurityConfig {
                 .requestMatchers("/users/**").permitAll()
                 .anyRequest().authenticated()
             )
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);;
+            .addFilterBefore(clientIpFilter, UsernamePasswordAuthenticationFilter.class)
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 }

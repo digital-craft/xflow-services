@@ -5,6 +5,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.context.ApplicationEventPublisher;
 import auth.service.xflow_auth_service.models.User;
 import auth.service.xflow_auth_service.models.RefreshToken;
 import auth.service.xflow_auth_service.models.AnonymousToken;
@@ -21,9 +22,11 @@ import auth.service.xflow_auth_service.dao.ChangePinRequest;
 import auth.service.xflow_auth_service.dto.LoginResponse;
 import auth.service.xflow_auth_service.dto.UserResponse;
 import auth.service.xflow_auth_service.config.RsaKeyConfig;
+import auth.service.xflow_auth_service.utils.events.AuditEvent;
 import auth.service.xflow_auth_service.utils.security.SecurityUtils;
 import auth.service.xflow_auth_service.utils.mappers.UserMapper;
 import auth.service.xflow_auth_service.utils.security.AnonymousRateLimiter;
+import auth.service.xflow_auth_service.utils.events.RequestContextHolder;
 import lombok.RequiredArgsConstructor;
 
 import java.time.OffsetDateTime;
@@ -45,9 +48,11 @@ public class AuthService {
     private final RefreshTokenService refreshTokenService;
     private final SecurityUtils securityUtils;
     private final UserMapper userMapper;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public LoginResponse login(LoginRequest request) {
+        String ip = RequestContextHolder.getClientIp();
         User user = userRepository.findByEmail(request.email())
                 .orElseThrow(() -> new BadCredentialsException("invalid-credentials"));
         if (loginAttemptService.isAccountLocked(user)) {
@@ -62,6 +67,15 @@ public class AuthService {
         userRepository.save(user);
         String token = jwtService.generateToken(user);
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getId());
+        eventPublisher.publishEvent(new AuditEvent(
+            "xflow-auth-service",
+            "users",
+            user.getId().toString(),
+            user.getEmail(),
+            "USER_LOGIN",
+            "User logged successfully",
+            ip
+        ));
         return new LoginResponse(
             token,
             refreshToken.getToken(),
@@ -73,6 +87,7 @@ public class AuthService {
 
     @Transactional
     public LoginResponse loginOperator(LoginPinRequest request) {
+        String ip = RequestContextHolder.getClientIp();
         List<User> users = userRepository.findAllByRole(UserRole.ROLE_OPERATOR);
         User user = users.stream()
             .filter(
@@ -88,6 +103,15 @@ public class AuthService {
         userRepository.save(user);
         String token = jwtService.generateToken(user);
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getId());
+        eventPublisher.publishEvent(new AuditEvent(
+            "xflow-auth-service",
+            "users",
+            user.getId().toString(),
+            user.getEmail(),
+            "USER_LOGIN",
+            "User logged successfully",
+            ip
+        ));
         return new LoginResponse(
                 token,
                 refreshToken.getToken(),
@@ -99,6 +123,7 @@ public class AuthService {
 
     @Transactional
     public LoginResponse loginAnonymous(String fingerprint) {
+        String ip = RequestContextHolder.getClientIp();
         if (!anonymousLimiter.isAllowed(fingerprint)) {
             throw new LockedException("too-many-attempts");
         }
@@ -107,6 +132,15 @@ public class AuthService {
         AnonymousToken savedToken = anonymousTokenRepository.save(tokenEntity);
         anonymousLimiter.recordAttempt(fingerprint);
         String jwt = jwtService.generateAnonymousToken(savedToken.getId().toString(), "PARTICIPANT");
+        eventPublisher.publishEvent(new AuditEvent(
+            "xflow-auth-service",
+            "anonymous_tokens",
+            savedToken.getId().toString(),
+            "unknown",
+            "USER_LOGIN",
+            "User logged successfully",
+            ip
+        ));
         return new LoginResponse(
                 jwt,
                 "",
@@ -118,6 +152,7 @@ public class AuthService {
 
     @Transactional
     public LoginResponse refreshToken(RefreshTokenRequest request) {
+        String ip = RequestContextHolder.getClientIp();
         String requestToken = request.refreshToken();
         return refreshTokenRepository.findByToken(requestToken)
                 .map(refreshTokenService::verifyExpiration)
@@ -137,6 +172,8 @@ public class AuthService {
 
     @Transactional
     public UserResponse regenerateOperatorCredentials(UUID id) {
+        String ip = RequestContextHolder.getClientIp();
+        String actorEmail = RequestContextHolder.getUserEmail();
         if (!userRepository.existsById(id)) {
             throw new RuntimeException("operator-not-found");
         }
@@ -149,11 +186,21 @@ public class AuthService {
         operator.setPinChanged(false);
         userRepository.save(operator);
         securityUtils.sendCredentialsEmail(operator.getEmail(), rawPassword, rawPin);
+        eventPublisher.publishEvent(new AuditEvent(
+            "xflow-auth-service",
+            "users",
+            operator.getId().toString(),
+            actorEmail != null ? actorEmail : "unknown",
+            "USER_REGENERATE_CREDENTIALS",
+            "User credentials regenerated successfully",
+            ip
+        ));
         return userMapper.toResponse(operator);
     }
 
     @Transactional
     public UserResponse changePassword(String email, ChangePasswordRequest request) {
+        String ip = RequestContextHolder.getClientIp();
         User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("user-not-found"));
         if (!passwordEncoder.matches(request.oldPassword(), user.getPassword())) {
             throw new RuntimeException("invalid-old-password");
@@ -162,11 +209,21 @@ public class AuthService {
         user.setPasswordChanged(true);
         userRepository.save(user);
         refreshTokenRepository.deleteByUserId(user.getId());
+        eventPublisher.publishEvent(new AuditEvent(
+            "xflow-auth-service",
+            "users",
+            user.getId().toString(),
+            user.getEmail(),
+            "USER_CHANGE_PASSWORD",
+            "User changed password successfully",
+            ip
+        ));
         return userMapper.toResponse(user);
     }
 
     @Transactional
     public UserResponse changePin(String email, ChangePinRequest request) {
+        String ip = RequestContextHolder.getClientIp();
         User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("user-not-found"));
         if (!passwordEncoder.matches(request.oldPin(), user.getPin())) {
             throw new RuntimeException("invalid-old-pin");
@@ -178,13 +235,33 @@ public class AuthService {
         user.setPinChanged(true);
         userRepository.save(user);
         refreshTokenRepository.deleteByUserId(user.getId());
+        eventPublisher.publishEvent(new AuditEvent(
+            "xflow-auth-service",
+            "users",
+            user.getId().toString(),
+            user.getEmail(),
+            "USER_CHANGE_PIN",
+            "User changed pin successfully",
+            ip
+        ));
         return userMapper.toResponse(user);
     }
     
     @Transactional
     public void logout(LogoutRequest request) {
+        String actorEmail = RequestContextHolder.getUserEmail();
+        String ip = RequestContextHolder.getClientIp();
         String requestToken = request.refreshToken();
         refreshTokenRepository.findByToken(requestToken)
             .ifPresent(token -> refreshTokenRepository.delete(token));
+        eventPublisher.publishEvent(new AuditEvent(
+            "xflow-auth-service",
+            "users",
+            actorEmail != null ? actorEmail : "unknown",
+            actorEmail != null ? actorEmail : "unknown",
+            "USER_LOGOUT",
+            "User logged out successfully",
+            ip
+        ));
     }
 }

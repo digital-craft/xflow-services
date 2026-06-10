@@ -7,6 +7,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
+import org.springframework.scheduling.annotation.EnableAsync;
 import auth.service.xflow_auth_service.models.User;
 import auth.service.xflow_auth_service.models.enums.UserRole;
 import auth.service.xflow_auth_service.repositories.UserRepository;
@@ -15,6 +16,7 @@ import java.time.OffsetDateTime;
 
 @SpringBootApplication
 @ConfigurationPropertiesScan
+@EnableAsync
 @EnableSpringDataWebSupport(pageSerializationMode = EnableSpringDataWebSupport.PageSerializationMode.VIA_DTO)
 public class XflowAuthServiceApplication {
 
