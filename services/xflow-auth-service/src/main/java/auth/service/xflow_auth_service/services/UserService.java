@@ -33,10 +33,12 @@ public class UserService {
             .role(UserRole.ROLE_OPERATOR)
             .build();
         userRepository.save(operator);
-        // sendCredentialsEmail(request.email(), rawPassword, rawPin);
+        sendCredentialsEmail(operator.getEmail(), rawPassword, rawPin);
         return new CreateOperatorResponse(
+            operator.getId(),
             operator.getEmail(),
             operator.getRole().name(),
+            operator.isActive(),
             System.currentTimeMillis()
         );
     }
@@ -52,10 +54,32 @@ public class UserService {
         operator.setPassword(passwordEncoder.encode(rawPassword));
         operator.setPin(passwordEncoder.encode(rawPin));
         userRepository.save(operator);
-        // sendCredentialsEmail(request.email(), rawPassword, rawPin);
+        sendCredentialsEmail(operator.getEmail(), rawPassword, rawPin);
         return new CreateOperatorResponse(
+            operator.getId(),
             operator.getEmail(),
             operator.getRole().name(),
+            operator.isActive(),
+            System.currentTimeMillis()
+        );
+    }
+
+    @Transactional
+    public CreateOperatorResponse toggleOperatorActiveStatus(UUID id) {
+        if (!userRepository.existsById(id)) {
+            throw new RuntimeException("operator-not-found");
+        }
+        User operator = userRepository.findById(id).orElseThrow(() -> new RuntimeException("operator-not-found"));
+        if (operator.getRole() != UserRole.ROLE_OPERATOR) {
+            throw new RuntimeException("only-operator-accounts-can-be-toggled");
+        }
+        operator.setActive(!operator.isActive());
+        userRepository.save(operator);
+        return new CreateOperatorResponse(
+            operator.getId(),
+            operator.getEmail(),
+            operator.getRole().name(),
+            operator.isActive(),
             System.currentTimeMillis()
         );
     }

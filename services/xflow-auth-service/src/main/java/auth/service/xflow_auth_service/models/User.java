@@ -35,6 +35,10 @@ public class User extends DateBaseModel {
     @Column(nullable = false)
     private UserRole role;
 
+    @Column(name = "is_active", nullable = false)
+    @Builder.Default
+    private boolean active = false;
+
     @Column(name = "last_login_at")
     private OffsetDateTime lastLoginAt;
 
