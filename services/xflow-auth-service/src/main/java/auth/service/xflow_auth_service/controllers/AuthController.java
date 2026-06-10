@@ -24,7 +24,7 @@ import auth.service.xflow_auth_service.dao.ChangePasswordRequest;
 import auth.service.xflow_auth_service.dao.ChangePinRequest;
 import auth.service.xflow_auth_service.dto.LoginResponse;
 import auth.service.xflow_auth_service.dto.ApiResponse;
-import auth.service.xflow_auth_service.dto.CreateOperatorResponse;
+import auth.service.xflow_auth_service.dto.UserResponse;
 
 import java.util.UUID;
 
@@ -65,7 +65,7 @@ public class AuthController {
 
     @PutMapping("/operator/{id}/regenerate-credentials")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<ApiResponse<CreateOperatorResponse>> regenerateOperatorCredentials(
+    public ResponseEntity<ApiResponse<UserResponse>> regenerateOperatorCredentials(
         @PathVariable UUID id
     ) {
         return ResponseEntity.ok(new ApiResponse<>(
@@ -76,7 +76,7 @@ public class AuthController {
 
     @PutMapping("/me/password")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<ApiResponse<CreateOperatorResponse>> changePassword(
+    public ResponseEntity<ApiResponse<UserResponse>> changePassword(
         @AuthenticationPrincipal UserDetails userDetails,
         @Valid @RequestBody ChangePasswordRequest request
     ) {
@@ -88,7 +88,7 @@ public class AuthController {
 
     @PutMapping("/me/pin")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<ApiResponse<CreateOperatorResponse>> changePin(
+    public ResponseEntity<ApiResponse<UserResponse>> changePin(
         @AuthenticationPrincipal UserDetails userDetails,
         @Valid @RequestBody ChangePinRequest request
     ) {

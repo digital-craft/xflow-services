@@ -19,9 +19,11 @@ import auth.service.xflow_auth_service.dao.LogoutRequest;
 import auth.service.xflow_auth_service.dao.ChangePasswordRequest;
 import auth.service.xflow_auth_service.dao.ChangePinRequest;
 import auth.service.xflow_auth_service.dto.LoginResponse;
-import auth.service.xflow_auth_service.dto.CreateOperatorResponse;
+import auth.service.xflow_auth_service.dto.UserResponse;
 import auth.service.xflow_auth_service.config.RsaKeyConfig;
 import auth.service.xflow_auth_service.utils.security.SecurityUtils;
+import auth.service.xflow_auth_service.utils.mappers.UserMapper;
+import auth.service.xflow_auth_service.utils.security.AnonymousRateLimiter;
 import lombok.RequiredArgsConstructor;
 
 import java.time.OffsetDateTime;
@@ -42,6 +44,7 @@ public class AuthService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final RefreshTokenService refreshTokenService;
     private final SecurityUtils securityUtils;
+    private final UserMapper userMapper;
 
     @Transactional
     public LoginResponse login(LoginRequest request) {
@@ -133,7 +136,7 @@ public class AuthService {
     }
 
     @Transactional
-    public CreateOperatorResponse regenerateOperatorCredentials(UUID id) {
+    public UserResponse regenerateOperatorCredentials(UUID id) {
         if (!userRepository.existsById(id)) {
             throw new RuntimeException("operator-not-found");
         }
@@ -146,17 +149,11 @@ public class AuthService {
         operator.setPinChanged(false);
         userRepository.save(operator);
         securityUtils.sendCredentialsEmail(operator.getEmail(), rawPassword, rawPin);
-        return new CreateOperatorResponse(
-            operator.getId(),
-            operator.getEmail(),
-            operator.getRole().name(),
-            operator.isActive(),
-            System.currentTimeMillis()
-        );
+        return userMapper.toResponse(operator);
     }
 
     @Transactional
-    public CreateOperatorResponse changePassword(String email, ChangePasswordRequest request) {
+    public UserResponse changePassword(String email, ChangePasswordRequest request) {
         User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("user-not-found"));
         if (!passwordEncoder.matches(request.oldPassword(), user.getPassword())) {
             throw new RuntimeException("invalid-old-password");
@@ -165,17 +162,11 @@ public class AuthService {
         user.setPasswordChanged(true);
         userRepository.save(user);
         refreshTokenRepository.deleteByUserId(user.getId());
-        return new CreateOperatorResponse(
-            user.getId(),
-            user.getEmail(),
-            user.getRole().name(),
-            user.isActive(),
-            System.currentTimeMillis()
-        );
+        return userMapper.toResponse(user);
     }
 
     @Transactional
-    public CreateOperatorResponse changePin(String email, ChangePinRequest request) {
+    public UserResponse changePin(String email, ChangePinRequest request) {
         User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("user-not-found"));
         if (!passwordEncoder.matches(request.oldPin(), user.getPin())) {
             throw new RuntimeException("invalid-old-pin");
@@ -187,13 +178,7 @@ public class AuthService {
         user.setPinChanged(true);
         userRepository.save(user);
         refreshTokenRepository.deleteByUserId(user.getId());
-        return new CreateOperatorResponse(
-            user.getId(),
-            user.getEmail(),
-            user.getRole().name(),
-            user.isActive(),
-            System.currentTimeMillis()
-        );
+        return userMapper.toResponse(user);
     }
     
     @Transactional
