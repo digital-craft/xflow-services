@@ -1,14 +1,18 @@
 package auth.service.xflow_auth_service.services;
 
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import auth.service.xflow_auth_service.repositories.UserRepository;
 import auth.service.xflow_auth_service.dao.CreateOperatorRequest;
-import auth.service.xflow_auth_service.dto.CreateOperatorResponse;
+import auth.service.xflow_auth_service.dto.UserResponse;
 import auth.service.xflow_auth_service.models.User;
 import auth.service.xflow_auth_service.models.enums.UserRole;
 import auth.service.xflow_auth_service.utils.security.SecurityUtils;
+import auth.service.xflow_auth_service.utils.mappers.UserMapper;
+import auth.service.xflow_auth_service.dto.UserResponse;
 import lombok.RequiredArgsConstructor;
 
 import java.util.UUID;
@@ -17,11 +21,12 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final SecurityUtils securityUtils;
     
     @Transactional
-    public CreateOperatorResponse createOperator(CreateOperatorRequest request) {
+    public UserResponse createOperator(CreateOperatorRequest request) {
         if (userRepository.existsByEmail(request.email())) {
             throw new RuntimeException("email-already-in-use");
         }
@@ -35,17 +40,11 @@ public class UserService {
             .build();
         userRepository.save(operator);
         securityUtils.sendCredentialsEmail(operator.getEmail(), rawPassword, rawPin);
-        return new CreateOperatorResponse(
-            operator.getId(),
-            operator.getEmail(),
-            operator.getRole().name(),
-            operator.isActive(),
-            System.currentTimeMillis()
-        );
+        return userMapper.toResponse(operator);
     }
 
     @Transactional
-    public CreateOperatorResponse toggleOperatorActiveStatus(UUID id) {
+    public UserResponse toggleOperatorActiveStatus(UUID id) {
         if (!userRepository.existsById(id)) {
             throw new RuntimeException("operator-not-found");
         }
@@ -55,12 +54,12 @@ public class UserService {
         }
         operator.setActive(!operator.isActive());
         userRepository.save(operator);
-        return new CreateOperatorResponse(
-            operator.getId(),
-            operator.getEmail(),
-            operator.getRole().name(),
-            operator.isActive(),
-            System.currentTimeMillis()
-        );
+        return userMapper.toResponse(operator);
+    }
+
+    @Transactional
+    public Page<UserResponse> getAllUsersPaginated(String email, UserRole role, Boolean active, Pageable pageable) {
+        Page<User> users = userRepository.findWithFilters(email, role, active, pageable);
+        return users.map(userMapper::toResponse);
     }
 }

@@ -7,5 +7,12 @@ import lombok.Data;
 @AllArgsConstructor
 public class ApiResponse<T> {
     public String message;
+    public long timestamp;
     public T results;
+
+    public ApiResponse(String message, T results) {
+        this.message = message;
+        this.results = results;
+        this.timestamp = System.currentTimeMillis();
+    }
 }

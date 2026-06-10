@@ -1,4 +1,4 @@
-package auth.service.xflow_auth_service.services;
+package auth.service.xflow_auth_service.utils.security;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
