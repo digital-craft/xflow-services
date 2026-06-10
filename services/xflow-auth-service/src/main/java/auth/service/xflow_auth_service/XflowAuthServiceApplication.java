@@ -29,6 +29,7 @@ public class XflowAuthServiceApplication {
 				testUser.setEmail("admin@xflow.io");
 				testUser.setPassword(encoder.encode("password123"));
 				testUser.setRole(UserRole.ROLE_ADMIN);
+				testUser.setActive(true);
 				repository.save(testUser);
 			}
 			if (repository.findByEmail("operator@xflow.io").isEmpty()) {

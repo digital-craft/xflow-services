@@ -3,7 +3,7 @@ package auth.service.xflow_auth_service.controllers;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -33,7 +33,7 @@ public class UserController {
         return ResponseEntity.ok(new ApiResponse<>("operator-created", userService.createOperator(request)));
     }
 
-    @GetMapping("/operator/{id}/regenerate-credentials")
+    @PutMapping("/operator/{id}/regenerate-credentials")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ApiResponse<CreateOperatorResponse>> regenerateOperatorCredentials(
         @PathVariable UUID id
@@ -43,4 +43,15 @@ public class UserController {
             userService.regenerateOperatorCredentials(id))
         );
     }   
+
+    @PutMapping("/operator/{id}/toggle-active-status")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<ApiResponse<CreateOperatorResponse>> toggleOperatorActiveStatus(
+        @PathVariable UUID id
+    ) {
+        return ResponseEntity.ok(new ApiResponse<>(
+            "operator-active-status-toggled",
+            userService.toggleOperatorActiveStatus(id))
+        );
+    }
 }
