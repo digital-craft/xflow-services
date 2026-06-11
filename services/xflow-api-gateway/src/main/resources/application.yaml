@@ -16,3 +16,7 @@ spring:
           uri: http://xflow-auth-service:8080
           predicates:
             - Path=/audit-logs/**
+        - id: auth-api-docs
+          uri: http://xflow-auth-service:8080
+          predicates:
+            - Path=/auth-service/**, /webjars/**
