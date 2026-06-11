@@ -58,7 +58,7 @@ public class UserController {
         @RequestParam(required = false) String email,
         @RequestParam(required = false) UserRole role,
         @RequestParam(required = false) boolean active,
-        @PageableDefault(page = 0, size = 10, sort = "email", direction = Sort.Direction.ASC) Pageable pageable
+        @PageableDefault(page = 0, size = 20, sort = "email", direction = Sort.Direction.ASC) Pageable pageable
     ) {
         Page<UserResponse> usersPage = userService.getAllUsersPaginated(email, role, active, pageable);
         return ResponseEntity.ok(new ApiResponse<>("users-retrieved-successfully", usersPage));
