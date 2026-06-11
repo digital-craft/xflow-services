@@ -28,6 +28,10 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
+                .requestMatchers(
+                    "/auth-service/api/**", 
+                    "/webjars/**"
+                ).permitAll()
                 .requestMatchers("/auth/**", "/actuator/health").permitAll()
                 .requestMatchers("/users/**").permitAll()
                 .anyRequest().authenticated()
