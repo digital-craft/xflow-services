@@ -3,6 +3,18 @@ spring:
     name: xflow-api-gateway
   cloud:
     gateway:
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+              - PATCH
+            allowedHeaders: "*"
       routes:
         - id: auth-service
           uri: http://xflow-auth-service:8080
@@ -19,4 +31,6 @@ spring:
         - id: auth-api-docs
           uri: http://xflow-auth-service:8080
           predicates:
-            - Path=/auth-service/**, /webjars/**
+            - Path=/auth-service/**, /webjars/**, /api/swagger-ui/**, /v3/api-docs/**
+          filters:
+          - 'RewritePath=/auth-service/(?<segment>.*), /${segment}'
