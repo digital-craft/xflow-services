@@ -169,6 +169,24 @@ public class AuthService {
                 })
                 .orElseThrow(() -> new BadCredentialsException("unknown-token"));
     }
+    
+    @Transactional
+    public void logout(LogoutRequest request) {
+        String actorEmail = RequestContextHolder.getUserEmail();
+        String ip = RequestContextHolder.getClientIp();
+        String requestToken = request.refreshToken();
+        refreshTokenRepository.findByToken(requestToken)
+            .ifPresent(token -> refreshTokenRepository.delete(token));
+        eventPublisher.publishEvent(new AuditEvent(
+            "xflow-auth-service",
+            "users",
+            actorEmail != null ? actorEmail : "unknown",
+            actorEmail != null ? actorEmail : "unknown",
+            "USER_LOGOUT",
+            "User logged out successfully",
+            ip
+        ));
+    }
 
     @Transactional
     public UserResponse regenerateOperatorCredentials(UUID id) {
@@ -246,22 +264,20 @@ public class AuthService {
         ));
         return userMapper.toResponse(user);
     }
-    
+
     @Transactional
-    public void logout(LogoutRequest request) {
-        String actorEmail = RequestContextHolder.getUserEmail();
+    public UserResponse getCurrentUserInfo(String email) {
         String ip = RequestContextHolder.getClientIp();
-        String requestToken = request.refreshToken();
-        refreshTokenRepository.findByToken(requestToken)
-            .ifPresent(token -> refreshTokenRepository.delete(token));
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("user-not-found"));
         eventPublisher.publishEvent(new AuditEvent(
             "xflow-auth-service",
             "users",
-            actorEmail != null ? actorEmail : "unknown",
-            actorEmail != null ? actorEmail : "unknown",
-            "USER_LOGOUT",
-            "User logged out successfully",
+            user.getId().toString(),
+            user.getEmail(),
+            "USER_INFO_RETRIEVED",
+            "User info retrieved successfully",
             ip
         ));
+        return userMapper.toResponse(user);
     }
 }

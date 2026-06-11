@@ -2,6 +2,7 @@ package auth.service.xflow_auth_service.controllers;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -184,5 +185,26 @@ public class AuthController {
             "pin-changed",
             authService.changePin(userDetails.getUsername(), request))
         );
-    }  
+    }
+    
+    @GetMapping("/me")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(
+        summary = "Get current user info",
+        description = "Retrieves the authenticated user's information and account status"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "User info retrieved successfully",
+            content = @Content(schema = @Schema(implementation = UserResponse.class))),
+        @ApiResponse(responseCode = "401", description = "User not authenticated")
+    })
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<XflowResponse<UserResponse>> getCurrentUserInfo(
+        @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        return ResponseEntity.ok(new XflowResponse<>(
+            "current-user-info",
+            authService.getCurrentUserInfo(userDetails.getUsername()))
+        );
+    }
 }
