@@ -83,7 +83,7 @@ public class UserService {
         return userMapper.toResponse(operator);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public Page<UserResponse> getAllUsersPaginated(String email, UserRole role, Boolean active, Pageable pageable) {
         String ip = RequestContextHolder.getClientIp();
         String actorEmail = RequestContextHolder.getUserEmail();

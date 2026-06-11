@@ -57,11 +57,31 @@ public class JwtService {
     }
 
     private Claims extractAllClaims(String token) {
-        return Jwts.parser()
-            .verifyWith(rsaKeyConfig.publicKey())
-            .build()
-            .parseSignedClaims(token)
-            .getPayload();
+        try {
+            return Jwts.parser()
+                .verifyWith(rsaKeyConfig.publicKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+        } catch (ExpiredJwtException e) {
+            // Token has expired
+            throw e;
+        } catch (io.jsonwebtoken.MalformedJwtException e) {
+            // Token format is invalid
+            throw new JwtException("Malformed JWT token: " + e.getMessage(), e);
+        } catch (io.jsonwebtoken.SignatureException e) {
+            // Token signature is invalid
+            throw new JwtException("Invalid JWT signature: " + e.getMessage(), e);
+        } catch (io.jsonwebtoken.UnsupportedJwtException e) {
+            // Token is not supported
+            throw new JwtException("Unsupported JWT token: " + e.getMessage(), e);
+        } catch (IllegalArgumentException e) {
+            // Token is empty or null
+            throw new JwtException("Empty JWT token: " + e.getMessage(), e);
+        } catch (JwtException e) {
+            // Generic JWT exception
+            throw e;
+        }
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
