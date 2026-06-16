@@ -21,6 +21,8 @@ services:
     volumes:
       - ./infra/docker/sql:/docker-entrypoint-initdb.d
       - pgdata:/var/lib/postgresql/data
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       - xflow-network
 
@@ -55,10 +57,12 @@ services:
     build:
       context: ./services/xflow-auth-service
     volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
       - ~/.m2:/root/.m2
     ports:
       - ${AUTH_SERVICE_PORT:-8081}:8080
     environment:
+      - TESTCONTAINERS_RYUK_DISABLED=true
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:${POSTGRES_PORT:-5432}/${POSTGRES_DB:-xflow}
       - SPRING_DATASOURCE_USERNAME=auth_${COMPOSE_PROJECT_NAME:-xflow}
       - SPRING_DATASOURCE_PASSWORD=auth_${POSTGRES_PASSWORD:-xflow}

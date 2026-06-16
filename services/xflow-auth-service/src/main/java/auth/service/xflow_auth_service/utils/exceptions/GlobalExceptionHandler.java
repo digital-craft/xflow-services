@@ -4,9 +4,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.LockedException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import jakarta.servlet.http.HttpServletRequest;
 import auth.service.xflow_auth_service.dto.ErrorResponse;
 import java.util.Objects;
 
@@ -19,6 +21,14 @@ public class GlobalExceptionHandler {
                         ? ex.getMessage() : "invalid-credentials";
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
             .body(new ErrorResponse(message, System.currentTimeMillis(), 401));
+    }
+
+    @ExceptionHandler(AuthorizationDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAuthorizationDeniedException(AuthorizationDeniedException ex, HttpServletRequest request) {
+        HttpStatus status = (request.getUserPrincipal() == null) ? HttpStatus.UNAUTHORIZED : HttpStatus.FORBIDDEN;
+        String message = (status == HttpStatus.UNAUTHORIZED) ? "missing-or-invalid-token" : "access-denied";
+        return ResponseEntity.status(status)
+            .body(new ErrorResponse(message, System.currentTimeMillis(), status.value()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

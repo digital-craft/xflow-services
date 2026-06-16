@@ -4,6 +4,18 @@ services:
 
   redis:
     container_name: redis-dev
+  
+  mailpit:
+    container_name: mailpit-dev
+    image: axllent/mailpit
+    restart: unless-stopped
+    ports:
+      - ${MAILPIT_WEB_UI_PORT:-8025}:8025
+      - ${MAILPIT_SMTP_PORT:-1025}:1025
+    environment:
+      - MP_MAX_MESSAGES=5000
+      - MP_SMTP_AUTH_ACCEPT_ANY=1
+      - MP_SMTP_AUTH_ALLOW_INSECURE=1
 
   xflow-api-gateway:
     build:

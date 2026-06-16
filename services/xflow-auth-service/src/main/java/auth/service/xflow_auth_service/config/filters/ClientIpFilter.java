@@ -31,8 +31,8 @@ public class ClientIpFilter implements Filter {
             String authHeader = httpRequest.getHeader("Authorization");
             if (authHeader != null && authHeader.startsWith("Bearer ")) {
                 String token = authHeader.substring(7);
-                String email = jwtService.extractUsername(token);
                 try {
+                    String email = jwtService.extractUsername(token);
                     if (email != null) {
                         RequestContextHolder.setUserEmail(email);
                     }

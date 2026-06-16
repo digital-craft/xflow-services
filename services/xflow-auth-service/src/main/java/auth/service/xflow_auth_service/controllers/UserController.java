@@ -28,7 +28,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import auth.service.xflow_auth_service.services.UserService;
-import auth.service.xflow_auth_service.dao.CreateOperatorRequest;
+import auth.service.xflow_auth_service.dao.OperatorRequest;
 import auth.service.xflow_auth_service.dto.UserResponse;
 import auth.service.xflow_auth_service.dto.XflowResponse;
 import auth.service.xflow_auth_service.models.enums.UserRole;
@@ -57,7 +57,7 @@ public class UserController {
     })
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<XflowResponse<UserResponse>> createOperator(
-        @Valid @RequestBody CreateOperatorRequest request
+        @Valid @RequestBody OperatorRequest request
     ) {
         return ResponseEntity.ok(new XflowResponse<>("operator-created", userService.createOperator(request)));
     }
