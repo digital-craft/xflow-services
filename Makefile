@@ -87,3 +87,7 @@ restart: down build dev
 clean-c:
 	$(DOCKER_COMP) exec $(c) $(MVN) clean
 	@echo "✅ Cleaned target directories in container $(c)."
+
+.PHONY: run-auth-tests
+run-auth-tests:
+	$(DOCKER_COMP) exec xflow-auth-service $(MVN) clean test -e

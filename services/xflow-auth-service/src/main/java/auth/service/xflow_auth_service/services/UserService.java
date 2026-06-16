@@ -7,7 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.context.ApplicationEventPublisher;
 import auth.service.xflow_auth_service.repositories.UserRepository;
-import auth.service.xflow_auth_service.dao.CreateOperatorRequest;
+import auth.service.xflow_auth_service.dao.OperatorRequest;
 import auth.service.xflow_auth_service.dto.UserResponse;
 import auth.service.xflow_auth_service.models.User;
 import auth.service.xflow_auth_service.models.enums.UserRole;
@@ -30,7 +30,7 @@ public class UserService {
     private final ApplicationEventPublisher eventPublisher;
     
     @Transactional
-    public UserResponse createOperator(CreateOperatorRequest request) {
+    public UserResponse createOperator(OperatorRequest request) {
         String ip = RequestContextHolder.getClientIp();
         String actorEmail = RequestContextHolder.getUserEmail();
         if (userRepository.existsByEmail(request.email())) {

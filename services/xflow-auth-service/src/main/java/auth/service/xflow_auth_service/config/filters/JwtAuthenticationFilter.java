@@ -65,26 +65,27 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
             filterChain.doFilter(request, response);
         } catch (ExpiredJwtException e) {
-            sendError(response, "The provided JWT token has expired", "TOKEN_EXPIRED");
+            sendError(response, HttpServletResponse.SC_UNAUTHORIZED, "The provided JWT token has expired", "TOKEN_EXPIRED");
         } catch (JwtException e) {
-            sendError(response, "Invalid or malformed JWT token", "INVALID_TOKEN");
+            sendError(response, HttpServletResponse.SC_UNAUTHORIZED, "Invalid or malformed JWT token", "INVALID_TOKEN");
         } catch (Exception e) {
-            sendError(response, "Authentication failed", "AUTH_ERROR");
+            sendError(response, HttpServletResponse.SC_UNAUTHORIZED, "Authentication failed", "AUTH_ERROR");
         }
     }
 
-    private void sendError(HttpServletResponse response, String message, String code) throws IOException {
-        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+    private void sendError(HttpServletResponse response, int statusCode, String message, String code) throws IOException {
+        response.setStatus(statusCode);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding("UTF-8");
+        String statusText = statusCode == HttpServletResponse.SC_UNAUTHORIZED ? "Unauthorized" : "Forbidden";
         String jsonResponse = String.format("""
             {
-                "status": 403,
-                "error": "Forbidden",
+                "status": %d,
+                "error": "%s",
                 "message": "%s",
                 "code": "%s"
             }
-            """, message, code);
+            """, statusCode, statusText, message, code);
         response.getWriter().write(jsonResponse);
     }
 }
