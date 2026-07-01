@@ -19,6 +19,7 @@ import auth.service.xflow_auth_service.utils.events.RequestContextHolder;
 import lombok.RequiredArgsConstructor;
 
 import java.util.UUID;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +29,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final SecurityUtils securityUtils;
     private final ApplicationEventPublisher eventPublisher;
+    private final EmailService emailService;
     
     @Transactional
     public UserResponse createOperator(OperatorRequest request) {
@@ -44,8 +46,23 @@ public class UserService {
             .pin(passwordEncoder.encode(rawPin))
             .role(UserRole.ROLE_OPERATOR)
             .build();
+        Map<String, String> emailFields = Map.of(
+            "login", request.email(),
+            "password", rawPassword,
+            "code", rawPin,
+            "role", UserRole.ROLE_OPERATOR.name(),
+            "primary_button", "https://www.google.com",
+            "privacy", "https://www.google.com",
+            "terms", "https://www.google.com"
+        );
         userRepository.save(operator);
-        securityUtils.sendCredentialsEmail(operator.getEmail(), rawPassword, rawPin);
+        emailService.sendTemplateEmailSync(
+            null,
+            request.email(),
+            "Welcome to XFlow — Your carrier access",
+            "classpath:templates/account-created.html",
+            emailFields
+        );
         eventPublisher.publishEvent(new AuditEvent(
             "xflow-auth-service",
             "users",
@@ -69,8 +86,41 @@ public class UserService {
         if (operator.getRole() != UserRole.ROLE_OPERATOR) {
             throw new RuntimeException("only-operator-accounts-can-be-toggled");
         }
-        operator.setActive(!operator.isActive());
+        Map<String, String> emailFields;
+        String subject;
+        String template;
+        if (operator.isActive()) {
+            subject = "Your account has been deactivated";
+            template = "classpath:templates/account-disabled.html";
+            emailFields = Map.of(
+                "login", operator.getEmail(),
+                "admin", actorEmail,
+                "reason", "Fraudulent activity",
+                "primary_button", "https://www.google.com",
+                "privacy", "https://www.google.com",
+                "terms", "https://www.google.com"
+            );
+        } else {
+            subject = "Your account has been reactivated";
+            template = "classpath:templates/account-enabled.html";
+            emailFields = Map.of(
+                "login", operator.getEmail(),
+                "admin", actorEmail,
+                "role", operator.getRole().name(),
+                "primary_button", "https://www.google.com",
+                "privacy", "https://www.google.com",
+                "terms", "https://www.google.com"
+            );
+        }
+        operator.setActive(!operator.isActive()); 
         userRepository.save(operator);
+        emailService.sendTemplateEmailSync(
+            null,
+            operator.getEmail(),
+            subject,
+            template,
+            emailFields
+        );
         eventPublisher.publishEvent(new AuditEvent(
             "xflow-auth-service",
             "users",

@@ -10,12 +10,14 @@ services:
     image: axllent/mailpit
     restart: unless-stopped
     ports:
-      - ${MAILPIT_WEB_UI_PORT:-8025}:8025
       - ${MAILPIT_SMTP_PORT:-1025}:1025
+      - ${MAILPIT_WEB_UI_PORT:-8025}:8025
     environment:
       - MP_MAX_MESSAGES=5000
       - MP_SMTP_AUTH_ACCEPT_ANY=1
       - MP_SMTP_AUTH_ALLOW_INSECURE=1
+    networks:
+      - xflow-network
 
   xflow-api-gateway:
     build:
@@ -36,11 +38,13 @@ services:
     environment:
       - REDIS_HOST=redis-dev
       - SPRING_PROFILES_ACTIVE=${ENV:-dev}
-      - SPRING_DEVTOOLS_RESTART_ENABLED=true
+      - MAILPIT_SMTP_PORT=${MAILPIT_SMTP_PORT:-1025}
     volumes:
       - ./pom.xml:/xflow/pom.xml
       - ./services/xflow-auth-service:/xflow/auth/app
       - ~/.m2:/root/.m2
+    depends_on:
+      - mailpit
 
 volumes:
   pgdata:
