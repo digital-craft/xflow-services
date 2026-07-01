@@ -36,7 +36,7 @@ public class SecurityConfig {
                     "/v3/api-docs/**",
                     "/webjars/**"
                 ).permitAll()
-                .requestMatchers("/auth/**", "/actuator/health").permitAll()
+                .requestMatchers("/login/**", "/refresh", "/logout", "/actuator/health").permitAll()
                 .requestMatchers("/users/**").permitAll()
                 .anyRequest().authenticated()
             )
