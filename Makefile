@@ -1,6 +1,7 @@
 # Makefile for xflow-services: setup, launch, monitor, inspect containers (dev/prod)
 
 -include .env
+-include services/xflow-auth-service/Makefile
 
 # Load ENV from .env (default to 'dev' if not set)
 ifdef ENV
@@ -59,14 +60,8 @@ dev:
 	$(DOCKER_COMP) up -d
 
 # Monitor (logs)
-.PHONY: logs
-logs:
-	$(DOCKER_COMP) logs -f
-
-# Listen logs from a specific container: make logs-c c=<container_name>
-.PHONY: logs-c
-logs-c:
-	$(DOCKER_COMP) logs -f $(c)
+.PHONY: logs-all
+logs-all: logs-auth-service
 
 # Inspect (status)
 .PHONY: ps
@@ -82,12 +77,9 @@ down:
 .PHONY: restart
 restart: down build dev
 
-# clean mvn target directories (for Java services) for specific container: make clean-c c=<container_name>
-.PHONY: clean-c
-clean-c:
-	$(DOCKER_COMP) exec $(c) $(MVN) clean
-	@echo "✅ Cleaned target directories in container $(c)."
+# clean mvn target directories (for Java services) for all containers
+.PHONY: clean-all
+clean-all: clean-auth-service
 
-.PHONY: run-auth-tests
-run-auth-tests:
-	$(DOCKER_COMP) exec xflow-auth-service $(MVN) clean test -e
+.PHONY: run-tests
+run-tests: run-auth-tests
