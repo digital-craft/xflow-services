@@ -1,0 +1,96 @@
+services:
+  postgres:
+    image: postgis/postgis:16-3.4
+    container_name: postgres
+    environment:
+      POSTGRES_PORT: ${POSTGRES_PORT:-5432}
+      POSTGRES_DB: ${POSTGRES_DB:-xflow}
+      POSTGRES_USER: ${POSTGRES_USER:-xflow}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-xflow}
+    healthcheck:
+      test: ["CMD", "pg_isready", "-d", "${POSTGRES_DB}", "-U", "${POSTGRES_USER}"]
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    command: >
+      postgres
+        -c custom.app=${COMPOSE_PROJECT_NAME:-xflow}
+        -c custom.db_password=${POSTGRES_PASSWORD:-xflow}
+    ports:
+      - ${POSTGRES_PORT_EXT:-5432}:5432
+    volumes:
+      - ./infra/docker/sql:/docker-entrypoint-initdb.d
+      - pgdata:/var/lib/postgresql/data
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - xflow-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    ports:
+      - ${REDIS_PORT:-6379}:6379
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - xflow-network
+
+  xflow-api-gateway:
+    build:
+      context: ./services/xflow-api-gateway
+    volumes:
+      - ~/.m2:/root/.m2
+    ports:
+      - ${API_GATEWAY_PORT:-8080}:8080
+    command: ["./mvnw", "spring-boot:run"]
+    depends_on:
+      - xflow-auth-service
+    restart: on-failure
+    networks:
+      - xflow-network
+
+  xflow-auth-service:
+    build:
+      context: ./services/xflow-auth-service
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ~/.m2:/root/.m2
+    ports:
+      - ${AUTH_SERVICE_PORT:-8081}:8080
+    environment:
+      - TESTCONTAINERS_RYUK_DISABLED=true
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:${POSTGRES_PORT:-5432}/${POSTGRES_DB:-xflow}
+      - SPRING_DATASOURCE_USERNAME=auth_${COMPOSE_PROJECT_NAME:-xflow}
+      - SPRING_DATASOURCE_PASSWORD=auth_${POSTGRES_PASSWORD:-xflow}
+      - SPRING_DATASOURCE_DRIVER-CLASS-NAME=org.postgresql.Driver
+      - REDIS_HOST=redis
+      - REDIS_PORT=${REDIS_PORT:-6379}
+      - RSA_PRIVATE_KEY=${RSA_PRIVATE_KEY:-}
+      - RSA_PUBLIC_KEY=${RSA_PUBLIC_KEY:-}
+      - EXPIRATION_MS=${EXPIRATION_MS:-3600000}
+      - AUTH_MAX_FAILED_ATTEMPTS=${AUTH_MAX_FAILED_ATTEMPTS:-3}
+      - AUTH_LOCKOUT_DURATION_MS=${AUTH_LOCKOUT_DURATION_MS:-3600000}
+      - AUTH_ANON_MAX_ATTEMPTS=${AUTH_ANON_MAX_ATTEMPTS:-5}
+      - AUTH_ANON_LOCKOUT_DURATION_MS=${AUTH_ANON_LOCKOUT_DURATION_MS:-3600000}
+      - REFRESH_EXPIRATION_MS=${REFRESH_EXPIRATION_MS:-8640000000}
+    command: ["./mvnw", "spring-boot:run"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    depends_on:
+      - postgres
+    networks:
+      - xflow-network
+
+volumes:
+  pgdata:
+
+networks:
+  xflow-network:

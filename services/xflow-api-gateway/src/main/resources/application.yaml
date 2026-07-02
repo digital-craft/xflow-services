@@ -1,0 +1,91 @@
+spring:
+  application:
+    name: xflow-api-gateway
+  cloud:
+    gateway:
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+              - PATCH
+            allowedHeaders: "*"
+      routes:
+        # Route vers xflow-auth-service
+        # Chemins: /api/auth/**
+        # Variables d'environnement: XFLOW_AUTH_SERVICE_URL (défaut: http://xflow-auth-service:8080)
+        - id: auth-service
+          uri: ${XFLOW_AUTH_SERVICE_URL:http://xflow-auth-service:8080}
+          predicates:
+            - Path=/api/auth/**
+          filters:
+            - StripPrefix=2
+
+        # Route pour Swagger / SpringDoc / Webjars (cas particulier)
+        - id: auth-api-docs
+          uri: http://xflow-auth-service:8080
+          predicates:
+            - Path=/auth-service/**, /webjars/**, /api/swagger-ui/**, /v3/api-docs/**
+          filters:
+            - 'RewritePath=/auth-service/(?<segment>.*), /${segment}'
+
+        # Route vers les utilisateurs (dans le auth-service)
+        - id: users-service
+          uri: ${XFLOW_AUTH_SERVICE_URL:http://xflow-auth-service:8080}
+          predicates:
+            - Path=/api/users/**
+          filters:
+            - StripPrefix=2
+
+        # Route vers les logs d'audit (dans le auth-service)
+        - id: audit-logs-service
+          uri: ${XFLOW_AUTH_SERVICE_URL:http://xflow-auth-service:8080}
+          predicates:
+            - Path=/api/audit-logs/**
+          filters:
+            - StripPrefix=2
+
+        # Route vers xflow-map-service
+        # Chemins: /api/map/**
+        # Variables d'environnement: XFLOW_MAP_SERVICE_URL (défaut: http://xflow-map-service:8080)
+        - id: map-service
+          uri: ${XFLOW_MAP_SERVICE_URL:http://xflow-map-service:8080}
+          predicates:
+            - Path=/api/map/**
+          filters:
+            - StripPrefix=2
+
+        # Route vers xflow-tracking-analytics-service
+        # Chemins: /api/track/**
+        # Variables d'environnement: XFLOW_TRACKING_SERVICE_URL (défaut: http://xflow-tracking-analytics-service:8080)
+        - id: tracking-service
+          uri: ${XFLOW_TRACKING_SERVICE_URL:http://xflow-tracking-analytics-service:8080}
+          predicates:
+            - Path=/api/track/**
+          filters:
+            - StripPrefix=2
+
+        # Route vers xflow-routing-service
+        # Chemins: /api/route/**
+        # Variables d'environnement: XFLOW_ROUTING_SERVICE_URL (défaut: http://xflow-routing-service:8080)
+        - id: routing-service
+          uri: ${XFLOW_ROUTING_SERVICE_URL:http://xflow-routing-service:8080}
+          predicates:
+            - Path=/api/route/**
+          filters:
+            - StripPrefix=2
+
+        # Route vers xflow-link-notif-service
+        # Chemins: /api/link/**
+        # Variables d'environnement: XFLOW_LINK_NOTIF_SERVICE_URL (défaut: http://xflow-link-notif-service:8080)
+        - id: link-notif-service
+          uri: ${XFLOW_LINK_NOTIF_SERVICE_URL:http://xflow-link-notif-service:8080}
+          predicates:
+            - Path=/api/link/**
+          filters:
+            - StripPrefix=2
