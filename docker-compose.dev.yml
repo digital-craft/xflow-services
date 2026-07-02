@@ -4,7 +4,11 @@ services:
 
   redis:
     container_name: redis-dev
-  
+
+  docs:
+    container_name: docs-dev
+    command: serve -a 0.0.0.0:8000
+
   mailpit:
     container_name: mailpit-dev
     image: axllent/mailpit
