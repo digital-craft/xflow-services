@@ -34,6 +34,22 @@ spring:
           filters:
             - 'RewritePath=/auth-service/(?<segment>.*), /${segment}'
 
+        # Route vers les utilisateurs (dans le auth-service)
+        - id: users-service
+          uri: ${XFLOW_AUTH_SERVICE_URL:http://xflow-auth-service:8080}
+          predicates:
+            - Path=/api/users/**
+          filters:
+            - StripPrefix=2
+
+        # Route vers les logs d'audit (dans le auth-service)
+        - id: audit-logs-service
+          uri: ${XFLOW_AUTH_SERVICE_URL:http://xflow-auth-service:8080}
+          predicates:
+            - Path=/api/audit-logs/**
+          filters:
+            - StripPrefix=2
+
         # Route vers xflow-map-service
         # Chemins: /api/map/**
         # Variables d'environnement: XFLOW_MAP_SERVICE_URL (défaut: http://xflow-map-service:8080)
