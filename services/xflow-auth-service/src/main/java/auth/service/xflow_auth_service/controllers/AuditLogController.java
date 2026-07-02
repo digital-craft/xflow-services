@@ -1,7 +1,6 @@
 package auth.service.xflow_auth_service.controllers;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,7 +29,6 @@ import auth.service.xflow_auth_service.dto.XflowResponse;
 import auth.service.xflow_auth_service.dto.AuditLogResponse;
 
 @RestController
-@RequestMapping("/audit-logs")
 @RequiredArgsConstructor
 @Tag(name = "Audit Logs", description = "Audit logging endpoints for tracking system events and changes")
 public class AuditLogController {
