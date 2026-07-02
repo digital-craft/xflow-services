@@ -23,5 +23,30 @@
 hs_err_pid*
 replay_pid*
 
+# Maven build output
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+
+# macOS
+.DS_Store
+
+# Environment files
 .env
+.env.local
+.env.*.local
+
+# infra keys
 infra/keys
+
+# Postman (local exports)
+.postman/
+postman
+# Editor temp files
+*~
+*.swp
+*.swo
