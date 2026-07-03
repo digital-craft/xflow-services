@@ -1,4 +1,8 @@
 services:
+  docs:
+    container_name: docs-dev
+    command: build
+
   xflow-api-gateway:
     build:
       context: ./services/xflow-api-gateway
