@@ -32,6 +32,7 @@ import lombok.RequiredArgsConstructor;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -49,6 +50,7 @@ public class AuthService {
     private final SecurityUtils securityUtils;
     private final UserMapper userMapper;
     private final ApplicationEventPublisher eventPublisher;
+    private final EmailService emailService;
 
     @Transactional
     public LoginResponse login(LoginRequest request) {
@@ -67,6 +69,20 @@ public class AuthService {
         userRepository.save(user);
         String token = jwtService.generateToken(user);
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getId());
+        Map<String, String> emailFields = Map.of(
+            "login", request.email(),
+            "ip_address", ip,
+            "primary_button", "https://www.google.com",
+            "privacy", "https://www.google.com",
+            "terms", "https://www.google.com"
+        );
+        emailService.sendTemplateEmailSync(
+            null,
+            request.email(),
+            "Welcome to XFlow — Your carrier access",
+            "classpath:templates/login-confirmed.html",
+            emailFields
+        );
         eventPublisher.publishEvent(new AuditEvent(
             "xflow-auth-service",
             "users",
@@ -103,6 +119,20 @@ public class AuthService {
         userRepository.save(user);
         String token = jwtService.generateToken(user);
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getId());
+        Map<String, String> emailFields = Map.of(
+            "login", user.getEmail(),
+            "ip_address", ip,
+            "primary_button", "https://www.google.com",
+            "privacy", "https://www.google.com",
+            "terms", "https://www.google.com"
+        );
+        emailService.sendTemplateEmailSync(
+            null,
+            user.getEmail(),
+            "Welcome to XFlow — Your carrier access",
+            "classpath:templates/login-confirmed.html",
+            emailFields
+        );
         eventPublisher.publishEvent(new AuditEvent(
             "xflow-auth-service",
             "users",
@@ -155,19 +185,19 @@ public class AuthService {
         String ip = RequestContextHolder.getClientIp();
         String requestToken = request.refreshToken();
         return refreshTokenRepository.findByToken(requestToken)
-                .map(refreshTokenService::verifyExpiration)
-                .map(token -> {
-                    User user = token.getUser();
-                    String accessToken = jwtService.generateToken(user);
-                    return new LoginResponse(
-                        accessToken,
-                        requestToken,
-                        "Bearer",
-                        user.getRole().name(), 
-                        rsaKeyConfig.expirationMs()
-                    );
-                })
-                .orElseThrow(() -> new BadCredentialsException("unknown-token"));
+            .map(refreshTokenService::verifyExpiration)
+            .map(token -> {
+                User user = token.getUser();
+                String accessToken = jwtService.generateToken(user);
+                return new LoginResponse(
+                    accessToken,
+                    requestToken,
+                    "Bearer",
+                    user.getRole().name(), 
+                    rsaKeyConfig.expirationMs()
+                );
+            })
+            .orElseThrow(() -> new BadCredentialsException("unknown-token"));
     }
     
     @Transactional
@@ -204,6 +234,22 @@ public class AuthService {
         operator.setPinChanged(false);
         userRepository.save(operator);
         securityUtils.sendCredentialsEmail(operator.getEmail(), rawPassword, rawPin);
+        Map<String, String> emailFields = Map.of(
+            "login", operator.getEmail(),
+            "password", rawPassword,
+            "code", rawPin,
+            "admin", actorEmail,
+            "primary_button", "https://www.google.com",
+            "privacy", "https://www.google.com",
+            "terms", "https://www.google.com"
+        );
+        emailService.sendTemplateEmailSync(
+            null,
+            operator.getEmail(),
+            "Your credentials have been reset by an administrator",
+            "classpath:templates/reset-credential.html",
+            emailFields
+        );
         eventPublisher.publishEvent(new AuditEvent(
             "xflow-auth-service",
             "users",
@@ -227,6 +273,20 @@ public class AuthService {
         user.setPasswordChanged(true);
         userRepository.save(user);
         refreshTokenRepository.deleteByUserId(user.getId());
+        Map<String, String> emailFields = Map.of(
+            "login", user.getEmail(),
+            "ip_address", ip,
+            "primary_button", "https://www.google.com",
+            "privacy", "https://www.google.com",
+            "terms", "https://www.google.com"
+        );
+        emailService.sendTemplateEmailSync(
+            null,
+            user.getEmail(),
+            "Your password has been changed",
+            "classpath:templates/password-updated.html",
+            emailFields
+        );
         eventPublisher.publishEvent(new AuditEvent(
             "xflow-auth-service",
             "users",
@@ -253,6 +313,20 @@ public class AuthService {
         user.setPinChanged(true);
         userRepository.save(user);
         refreshTokenRepository.deleteByUserId(user.getId());
+        Map<String, String> emailFields = Map.of(
+            "login", user.getEmail(),
+            "ip_address", ip,
+            "primary_button", "https://www.google.com",
+            "privacy", "https://www.google.com",
+            "terms", "https://www.google.com"
+        );
+        emailService.sendTemplateEmailSync(
+            null,
+            user.getEmail(),
+            "Your password has been changed",
+            "classpath:templates/pin-updated.html",
+            emailFields
+        );
         eventPublisher.publishEvent(new AuditEvent(
             "xflow-auth-service",
             "users",

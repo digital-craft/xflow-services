@@ -12,6 +12,8 @@ import auth.service.xflow_auth_service.utils.events.RequestContextHolder;
 import lombok.RequiredArgsConstructor;
 
 import java.time.OffsetDateTime;
+import java.util.Map;
+import java.time.format.DateTimeFormatter;
 
 @Service
 @RequiredArgsConstructor
@@ -19,14 +21,40 @@ public class LoginAttemptService {
     private final ApplicationEventPublisher eventPublisher;
     private final UserRepository userRepository;
     private final JwtConfig jwtConfig;
+    private final EmailService emailService;
+    private final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+    private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void incrementFailedAttempts(User user) {
+        Map<String, String> emailFields;
         String ip = RequestContextHolder.getClientIp();
         String actorEmail = RequestContextHolder.getUserEmail();
         int newAttempts = user.getFailedAttempts() + 1;
         user.setFailedAttempts(newAttempts);
+        OffsetDateTime now = OffsetDateTime.now();
+        String offset = now.getOffset().getId().equals("Z") ? "+00:00" : now.getOffset().getId();
         if (newAttempts >= jwtConfig.maxFailedAttempts()) {
+            long delayInMinutes = jwtConfig.lockoutDurationMs() / 60000;
+            OffsetDateTime delayTime = now.plusMinutes(delayInMinutes);
+            emailFields = Map.of(
+                "login", user.getEmail(),
+                "attempts", String.valueOf(newAttempts),
+                "last_attempt", now.format(timeFormatter),
+                "ip_address", ip,
+                "delay", String.valueOf(delayInMinutes / 60),
+                "primary_button", "https://www.google.com",
+                "secondary_button", "https://www.google.com",
+                "privacy", "https://www.google.com",
+                "terms", "https://www.google.com"
+            );
+            emailService.sendTemplateEmailSync(
+                null,
+                user.getEmail(),
+                "Votre compte XFlow a été temporairement bloqué",
+                "classpath:templates/account-locked.html",
+                emailFields
+            );
             eventPublisher.publishEvent(new AuditEvent(
                 "xflow-auth-service",
                 "users",
@@ -36,8 +64,27 @@ public class LoginAttemptService {
                 "Account locked due to too many failed login attempts.",
                 ip
             ));
-            user.setLockedUntil(OffsetDateTime.now().plusMinutes(jwtConfig.lockoutDurationMs() / 60000));
+            user.setLockedUntil(delayTime);
         }
+        emailFields = Map.of(
+            "login", user.getEmail(),
+            "date_time", now.format(dateTimeFormatter),
+            "timezone_offset", offset,
+            "ip_address", ip,
+            "attempt_count", String.valueOf(newAttempts),
+            "max_attempts", String.valueOf(jwtConfig.maxFailedAttempts()),
+            "primary_button", "https://www.google.com",
+            "secondary_button", "https://www.google.com",
+            "privacy", "https://www.google.com",
+            "terms", "https://www.google.com"
+        );
+        emailService.sendTemplateEmailSync(
+            null,
+            user.getEmail(),
+            "Votre compte XFlow a été temporairement bloqué",
+            "classpath:templates/login-attempt.html",
+            emailFields
+        );
         userRepository.save(user);
     }
 
