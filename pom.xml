@@ -38,6 +38,7 @@
     <mapstruct.version>1.6.3</mapstruct.version>
     <spring-boot-devtools.version>3.4.1</spring-boot-devtools.version>
     <springdoc.version>2.8.5</springdoc.version>
+    <datafaker.version>2.2.2</datafaker.version>
   </properties>
 
   <!-- ── BOM: centralized version management ───────────────────── -->
@@ -111,6 +112,11 @@
         <groupId>org.springdoc</groupId>
         <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
         <version>${springdoc.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>net.datafaker</groupId>
+        <artifactId>datafaker</artifactId>
+        <version>${datafaker.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
