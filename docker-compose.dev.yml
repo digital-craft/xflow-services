@@ -27,9 +27,14 @@ services:
     build:
       target: dev
     container_name: api-gateway-dev
+    command:
+      - sh
+      - -c
+      - |
+        chmod +x scripts/watch-compile.sh && scripts/watch-compile.sh &
+        exec ./mvnw spring-boot:run -Dspring-boot.run.jvmArguments="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5006"
     environment:
       - SPRING_PROFILES_ACTIVE=${ENV:-dev}
-      - SPRING_DEVTOOLS_RESTART_ENABLED=true
     volumes:
       - ./pom.xml:/xflow/pom.xml
       - ./services/xflow-api-gateway:/xflow/gateway/app
@@ -39,6 +44,12 @@ services:
     build:
       target: dev
     container_name: auth-service-dev
+    command:
+      - sh
+      - -c
+      - |
+        chmod +x scripts/watch-compile.sh && scripts/watch-compile.sh &
+        exec ./mvnw spring-boot:run -Dspring-boot.run.jvmArguments="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
     environment:
       - REDIS_HOST=redis-dev
       - SPRING_PROFILES_ACTIVE=${ENV:-dev}

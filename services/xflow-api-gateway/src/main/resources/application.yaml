@@ -1,6 +1,11 @@
 spring:
   application:
     name: xflow-api-gateway
+  devtools:
+    restart:
+      enabled: true
+    livereload:
+      enabled: true
   cloud:
     gateway:
       globalcors:

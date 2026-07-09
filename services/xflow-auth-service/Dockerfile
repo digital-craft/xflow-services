@@ -1,5 +1,6 @@
 # ----------- DEV STAGE -----------
 FROM eclipse-temurin:21-jdk AS dev
+RUN apt-get update && apt-get install -y --no-install-recommends inotify-tools && rm -rf /var/lib/apt/lists/*
 WORKDIR /xflow/auth/app
 COPY . /xflow/auth/app
 CMD ["./mvnw", "spring-boot:run"]
