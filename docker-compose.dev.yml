@@ -35,6 +35,8 @@ services:
         exec ./mvnw spring-boot:run -Dspring-boot.run.jvmArguments="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5006"
     environment:
       - SPRING_PROFILES_ACTIVE=${ENV:-dev}
+      - SPRING_DEVTOOLS_RESTART_ENABLED=true
+      - SPRING_DEVTOOLS_LIVE_RELOAD_ENABLED=true
     volumes:
       - ./pom.xml:/xflow/pom.xml
       - ./services/xflow-api-gateway:/xflow/gateway/app
@@ -54,6 +56,8 @@ services:
       - REDIS_HOST=redis-dev
       - SPRING_PROFILES_ACTIVE=${ENV:-dev}
       - MAILPIT_SMTP_PORT=${MAILPIT_SMTP_PORT:-1025}
+      - SPRING_DEVTOOLS_RESTART_ENABLED=true
+      - SPRING_DEVTOOLS_LIVE_RELOAD_ENABLED=true
     volumes:
       - ./pom.xml:/xflow/pom.xml
       - ./services/xflow-auth-service:/xflow/auth/app
