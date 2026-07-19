@@ -1,6 +1,5 @@
 package auth.service.xflow_auth_service.config;
 
-import io.jsonwebtoken.Jwts;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;

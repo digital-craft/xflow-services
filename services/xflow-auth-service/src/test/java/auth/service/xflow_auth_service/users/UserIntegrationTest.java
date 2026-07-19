@@ -1,4 +1,4 @@
-package auth.service.xflow_auth_service.auth;
+package auth.service.xflow_auth_service.users;
 
 import auth.service.xflow_auth_service.BaseIntegrationTest;
 import auth.service.xflow_auth_service.services.UserService;

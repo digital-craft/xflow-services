@@ -11,7 +11,6 @@ import auth.service.xflow_auth_service.models.User;
 import auth.service.xflow_auth_service.models.enums.UserRole;
 import auth.service.xflow_auth_service.repositories.UserRepository;
 
-import java.time.OffsetDateTime;
 import java.util.Locale;
 
 @Profile("dev")
@@ -27,6 +26,13 @@ public class DatabaseSeeder {
         if (userRepository.count() > count) {
             return;
         }
+        System.out.println("🌱 Génération automatique des fixtures avec Datafaker...");
+        User admin = new User();
+        admin.setEmail("admin@xflow.io");
+        admin.setPassword(encoder.encode("password123"));
+        admin.setRole(UserRole.ROLE_ADMIN);
+        admin.setActive(true);
+        userRepository.save(admin);
         Faker faker = new Faker(new Locale("en-US"));
         for (int i = 0; i < 50; i++) {
             User user = new User();
@@ -42,7 +48,6 @@ public class DatabaseSeeder {
     @Bean
     CommandLineRunner initDatabase(UserRepository userRepository) {
         return args -> {  
-            System.out.println("🌱 Génération automatique des fixtures avec Datafaker...");
             generateFakeUsers(50);
         };
     }

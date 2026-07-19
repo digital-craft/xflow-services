@@ -3,6 +3,7 @@ package auth.service.xflow_auth_service.services;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.lang.NonNull;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.context.ApplicationEventPublisher;
@@ -14,7 +15,6 @@ import auth.service.xflow_auth_service.models.enums.UserRole;
 import auth.service.xflow_auth_service.utils.events.AuditEvent;
 import auth.service.xflow_auth_service.utils.security.SecurityUtils;
 import auth.service.xflow_auth_service.utils.mappers.UserMapper;
-import auth.service.xflow_auth_service.dto.UserResponse;
 import auth.service.xflow_auth_service.utils.events.RequestContextHolder;
 import lombok.RequiredArgsConstructor;
 
@@ -76,7 +76,7 @@ public class UserService {
     }
 
     @Transactional
-    public UserResponse toggleOperatorActiveStatus(UUID id) {
+    public UserResponse toggleOperatorActiveStatus(@NonNull UUID id) {
         String ip = RequestContextHolder.getClientIp();
         String actorEmail = RequestContextHolder.getUserEmail();
         if (!userRepository.existsById(id)) {

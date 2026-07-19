@@ -2,6 +2,16 @@
 FROM eclipse-temurin:21-jdk AS dev
 WORKDIR /xflow/auth/app
 COPY . /xflow/auth/app
+
+
+# COPY .mvn/ .mvn/
+# COPY mvnw pom.xml ./
+
+# RUN chmod +x mvnw
+# RUN ./mvnw -q -DskipTests dependency:go-offline
+
+# COPY src ./src
+
 CMD ["./mvnw", "spring-boot:run"]
 
 # ----------- BUILD STAGE -----------

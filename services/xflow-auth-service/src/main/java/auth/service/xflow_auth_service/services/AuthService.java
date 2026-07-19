@@ -6,6 +6,8 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.lang.NonNull;
+
 import auth.service.xflow_auth_service.models.User;
 import auth.service.xflow_auth_service.models.RefreshToken;
 import auth.service.xflow_auth_service.models.AnonymousToken;
@@ -30,7 +32,6 @@ import auth.service.xflow_auth_service.utils.events.RequestContextHolder;
 import lombok.RequiredArgsConstructor;
 
 import java.time.OffsetDateTime;
-import java.util.Optional;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -145,7 +146,7 @@ public class AuthService {
         return new LoginResponse(
                 token,
                 refreshToken.getToken(),
-                "Bearer",
+                "Bearer2",
                 user.getRole().name(),
                 rsaKeyConfig.expirationMs()
         );
@@ -182,7 +183,6 @@ public class AuthService {
 
     @Transactional
     public LoginResponse refreshToken(RefreshTokenRequest request) {
-        String ip = RequestContextHolder.getClientIp();
         String requestToken = request.refreshToken();
         return refreshTokenRepository.findByToken(requestToken)
             .map(refreshTokenService::verifyExpiration)
@@ -219,7 +219,7 @@ public class AuthService {
     }
 
     @Transactional
-    public UserResponse regenerateOperatorCredentials(UUID id) {
+    public UserResponse regenerateOperatorCredentials(@NonNull UUID id) {
         String ip = RequestContextHolder.getClientIp();
         String actorEmail = RequestContextHolder.getUserEmail();
         if (!userRepository.existsById(id)) {

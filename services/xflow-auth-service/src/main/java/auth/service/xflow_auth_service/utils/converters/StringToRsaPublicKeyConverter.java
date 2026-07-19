@@ -1,6 +1,7 @@
-package auth.service.xflow_auth_service.config.converters;
+package auth.service.xflow_auth_service.utils.converters;
 
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.lang.NonNull;
 import org.springframework.boot.context.properties.ConfigurationPropertiesBinding;
 import org.springframework.stereotype.Component;
 
@@ -14,7 +15,7 @@ import java.util.Base64;
 public class StringToRsaPublicKeyConverter implements Converter<String, RSAPublicKey> {
 
     @Override
-    public RSAPublicKey convert(String source) {
+    public RSAPublicKey convert(@NonNull String source) {
         try {
             byte[] decoded = Base64.getDecoder().decode(source.trim());
             KeyFactory keyFactory = KeyFactory.getInstance("RSA");

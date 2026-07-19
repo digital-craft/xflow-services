@@ -29,7 +29,6 @@ public class LoginAttemptService {
     public void incrementFailedAttempts(User user) {
         Map<String, String> emailFields;
         String ip = RequestContextHolder.getClientIp();
-        String actorEmail = RequestContextHolder.getUserEmail();
         int newAttempts = user.getFailedAttempts() + 1;
         user.setFailedAttempts(newAttempts);
         OffsetDateTime now = OffsetDateTime.now();

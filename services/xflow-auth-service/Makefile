@@ -28,3 +28,20 @@ clean-auth-service:
 .PHONY: run-auth-tests
 run-auth-tests:
 	$(DOCKER_COMP) exec xflow-auth-service $(MVN) clean test -e
+
+.PHONY: watch-auth
+watch-auth:
+	@echo "Waiting for xflow-auth-service target directory (max 30s)..."
+	@timeout=30; \
+	while [ ! -d "services/xflow-auth-service/target" ]; do \
+		if [ $$timeout -le 0 ]; then \
+			echo "Timeout exceeded. The target directory for xflow-auth-service is not found."; \
+			exit 1; \
+		fi; \
+		sleep 1; \
+		timeout=$$((timeout - 1)); \
+	done
+	@echo "Target directory detected for xflow-auth-service. Applying permissions..."
+	sudo chown -cR $(shell id -u):$(shell id -g) services/xflow-auth-service/target
+	sudo chmod -cR u+rw services/xflow-auth-service/target
+	@echo "Permissions applied successfully on xflow-auth-service !"
