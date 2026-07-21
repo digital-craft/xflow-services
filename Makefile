@@ -2,7 +2,7 @@
 
 -include .env
 -include services/xflow-auth-service/Makefile
--include services/xflow-api-gateway/Makefile
+-include services/xflow-map-service/Makefile
 
 # Load ENV from .env (default to 'dev' if not set)
 ifdef ENV
