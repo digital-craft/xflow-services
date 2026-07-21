@@ -2,7 +2,6 @@ package auth.service.xflow_auth_service.models;
 
 import jakarta.persistence.*;
 import lombok.*;
-import auth.service.xflow_auth_service.models.enums.UserRole;
 import auth.service.xflow_auth_service.models.bases.DateBaseModel;
 
 import java.util.UUID;

@@ -1,7 +1,6 @@
 package auth.service.xflow_auth_service.services;
 
 import io.jsonwebtoken.*;
-import io.jsonwebtoken.security.Keys;
 import auth.service.xflow_auth_service.models.User;
 import auth.service.xflow_auth_service.config.RsaKeyConfig;
 import lombok.RequiredArgsConstructor;
@@ -10,7 +9,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.Date;
-import java.util.UUID;
 import java.util.function.Function;
 
 @Service

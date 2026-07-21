@@ -3,7 +3,6 @@ package auth.service.xflow_auth_service.repositories;
 import auth.service.xflow_auth_service.models.User;
 import auth.service.xflow_auth_service.models.enums.UserRole;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.domain.Page;
@@ -13,7 +12,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.List;
 
-@Repository
 public interface UserRepository extends JpaRepository<User, UUID> {
     
     Optional<User> findByEmail(String email);

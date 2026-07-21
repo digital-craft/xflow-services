@@ -3,6 +3,7 @@ package auth.service.xflow_auth_service.services;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.lang.NonNull;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
@@ -73,7 +74,7 @@ public class EmailService {
     }
 
     @Async
-    public void sendTemplateEmail(String from, String to, String subject, String templatePath, Map<String, String> templateVariables) {
+    public void sendTemplateEmail(String from, String to, String subject, @NonNull String templatePath, Map<String, String> templateVariables) {
         try {
             Resource resource = resourceLoader.getResource(templatePath);
             String htmlContent = new String(resource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
@@ -93,7 +94,7 @@ public class EmailService {
         }
     }
 
-    public void sendTemplateEmailSync(String from, String to, String subject, String templatePath, Map<String, String> templateVariables) {
+    public void sendTemplateEmailSync(String from, String to, String subject, @NonNull String templatePath, Map<String, String> templateVariables) {
         try {
             Resource resource = resourceLoader.getResource(templatePath);
             String htmlContent = new String(resource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);

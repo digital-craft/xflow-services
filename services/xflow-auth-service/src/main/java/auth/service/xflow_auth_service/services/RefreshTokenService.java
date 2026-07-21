@@ -1,7 +1,7 @@
 package auth.service.xflow_auth_service.services;
 
+import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import auth.service.xflow_auth_service.models.RefreshToken;
@@ -22,7 +22,7 @@ public class RefreshTokenService {
     private final UserRepository userRepository;
     private final RsaKeyConfig rsaKeyConfig;
 
-    public RefreshToken createRefreshToken(UUID userId) {
+    public RefreshToken createRefreshToken(@NonNull UUID userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BadCredentialsException("user-not-found"));
         refreshTokenRepository.deleteByUser(user);
