@@ -14,6 +14,10 @@ DECLARE
 BEGIN
     RAISE NOTICE 'App name: %', app;
     RAISE NOTICE 'Default password: %', default_password;
+
+    -- Ensure PostGIS is installed before service migrations run
+    EXECUTE 'CREATE EXTENSION IF NOT EXISTS postgis';
+
     FOREACH service_name IN ARRAY services
     LOOP
         -- 1. Creating the schema

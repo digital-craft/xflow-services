@@ -15,7 +15,7 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<name>XFlow Auth Service</name>
 	<description>Authentication service for XFlow platform</description>
-	<url/>
+	<url>https://github.com/digital-craft/xflow-services</url>
 
 	<licenses>
 		<license>

@@ -61,6 +61,7 @@ services:
     command: ["./mvnw", "spring-boot:run"]
     depends_on:
       - xflow-auth-service
+      - xflow-map-service
     restart: on-failure
     networks:
       - xflow-network
@@ -91,16 +92,44 @@ services:
       - REFRESH_EXPIRATION_MS=${REFRESH_EXPIRATION_MS:-8640000000}
     command: ["./mvnw", "spring-boot:run"]
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
     depends_on:
+      - mailpit
       - postgres
+      - redis
     networks:
       - xflow-network
-
+      
+  xflow-map-service:
+    build:
+      context: ./services/xflow-map-service
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ~/.m2:/root/.m2
+    ports:
+      - ${MAP_SERVICE_PORT:-8082}:8082
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:${POSTGRES_PORT:-5432}/${POSTGRES_DB:-xflow}
+      - SPRING_DATASOURCE_USERNAME=map_${COMPOSE_PROJECT_NAME:-xflow}
+      - SPRING_DATASOURCE_PASSWORD=map_${POSTGRES_PASSWORD:-xflow}
+      - SPRING_DATASOURCE_DRIVER-CLASS-NAME=org.postgresql.Driver
+    command: ["./mvnw", "spring-boot:run"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    depends_on:
+      - mailpit
+      - postgres
+      - redis
+    networks:
+      - xflow-network
 volumes:
   docs_node_modules:
   pgdata:
