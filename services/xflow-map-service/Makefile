@@ -28,3 +28,20 @@ clean-map-service:
 .PHONY: run-map-tests
 run-map-tests:
 	$(DOCKER_COMP) exec xflow-map-service $(MVN) clean test -e
+
+.PHONY: watch-map
+watch-map:
+	@echo "Waiting for xflow-map-service target directory (max 30s)..."
+	@timeout=30; \
+	while [ ! -d "services/xflow-map-service/target" ]; do \
+		if [ $$timeout -le 0 ]; then \
+			echo "Timeout exceeded. The target directory for xflow-map-service is not found."; \
+			exit 1; \
+		fi; \
+		sleep 1; \
+		timeout=$$((timeout - 1)); \
+	done
+	@echo "Target directory detected for xflow-map-service. Applying permissions..."
+	sudo chown -cR $(shell id -u):$(shell id -g) services/xflow-map-service/target
+	sudo chmod -cR u+rw services/xflow-map-service/target
+	@echo "Permissions applied successfully on xflow-map-service !"

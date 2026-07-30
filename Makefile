@@ -1,6 +1,7 @@
 # Makefile for xflow-services: setup, launch, monitor, inspect containers (dev/prod)
 
 -include .env
+-include services/xflow-api-gateway/Makefile
 -include services/xflow-auth-service/Makefile
 -include services/xflow-map-service/Makefile
 
@@ -60,9 +61,10 @@ show-urls:
 	@printf "${BLUE}+-------------------------------------------------+\n"
 	@printf "${BLUE}| XFLOW PLATFORM - Development Mode               |\n"
 	@printf "${BLUE}+-------------------------------------------------+\n"
+	@printf "${BLUE}| ${BLUE}%-19s ${BLUE}| ${LIGHT_BLUE}%-27s${BLUE} |\n" "📧 Email Service"     "http://localhost:$(MAILPIT_WEB_UI_PORT)"
 	@printf "${BLUE}| ${BLUE}%-19s ${BLUE}| ${LIGHT_BLUE}%-27s${BLUE} |\n" "🚀 API Gateway"     "http://localhost:$(API_GATEWAY_PORT)"
 	@printf "${BLUE}| ${BLUE}%-19s ${BLUE}| ${LIGHT_BLUE}%-27s${BLUE} |\n" "🔐 Auth Service"     "http://localhost:$(AUTH_SERVICE_PORT)"
-	@printf "${BLUE}| ${BLUE}%-19s ${BLUE}| ${LIGHT_BLUE}%-27s${BLUE} |\n" "📧 Email Service"     "http://localhost:$(MAILPIT_WEB_UI_PORT)"
+	@printf "${BLUE}| ${BLUE}%-22s ${BLUE}| ${LIGHT_BLUE}%-27s${BLUE} |\n" "🗺️ Map Service"     "http://localhost:$(MAP_SERVICE_PORT)"
 	@printf "${BLUE}+-------------------------------------------------+\n"
 	@printf "${GREEN}  ✔ All services are monitored with DevTools!${NC}\n"
 	@echo ""
@@ -78,7 +80,7 @@ build:
 
 # Watch realtime updates
 .PHONY: watch all containers
-watch-all: watch-auth watch-gateway
+watch-all: watch-auth watch-gateway watch-map
 
 # Launch (up services)
 .PHONY: dev
