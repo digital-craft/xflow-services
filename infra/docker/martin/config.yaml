@@ -1,0 +1,74 @@
+server:
+  bind: "0.0.0.0:${MARTIN_PORT:-3000}"
+
+# Martin configuration (generic, as it is subject to subsequent modifications)
+
+postgres:
+  connection_string: "${DATABASE_URL}"
+  # Connection pool optimized for high volumes
+  pool_size: 20
+  
+  # Max number of features per tile
+  max_feature_count: null
+  auto_bounds: quick
+  # Automatic publishing of all tables with geometry
+  auto_publish:
+    tables:
+      # Publish all tables from all SIGCOM schemas
+      # Note: Materialized views are also automatically discovered
+      from_schemas:
+        - map
+      # Filter by geometric column type
+      source_columns: auto
+      # Publish tables with spatial index
+      id_columns: auto
+    functions:
+      # Publish also functions that return geometries from all schemas
+      from_schemas:
+        - map
+
+# Server configuration
+listen_addresses: "0.0.0.0:${MARTIN_PORT:-3000}"
+
+# Workers for parallel processing
+# worker_processes: 8  # Number of worker processes (commented to use default value)
+
+# Aggressive caching for performance
+cache:
+  size_mb: 1024  # 1 GB of cache in memory
+  ttl_seconds: 3600  # Keep in cache for 1 hour
+
+# Compression for reducing bandwidth
+compression: gzip
+
+# Prefer spatial index for faster queries on geometry columns
+prefer_spatial_index: true
+
+# Logging
+log_level: info
+
+# Performance tuning
+limits:
+  query_timeout: 30
+  max_tile_size: 10485760
+
+# Auto bounds for tables with geometry columns (disabled for now due to heavy OSM table). Auto calculation of bounds per table.
+auto_bounds: false  # false because of heavy OSM table, can be enabled for other tables if needed
+
+# Default tile settings
+default_tile_settings:
+  extent: 4096
+  buffer: 64
+  clip_geom: true
+  minzoom: 0
+  maxzoom: 22
+
+# Bounding box (WGS84 / SRID 4326)
+# Format: [minx, miny, maxx, maxy] = [ouest, sud, est, nord]
+# bounds: [8.494722, 1.654722, 16.192222, 13.083611]
+
+# Keep-alive for persistent connections (in seconds)
+keep_alive: 60
+
+# Preload metadata at startup to avoid delays on first request
+preload_metadata: true

@@ -8,7 +8,10 @@ services:
   docs:
     container_name: docs-dev
     command: serve -a 0.0.0.0:8000
-
+  
+  martin:
+    container_name: martin-dev
+    
   mailpit:
     container_name: mailpit-dev
     image: axllent/mailpit

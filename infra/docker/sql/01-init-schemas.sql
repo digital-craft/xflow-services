@@ -16,7 +16,7 @@ BEGIN
     RAISE NOTICE 'Default password: %', default_password;
 
     -- Ensure PostGIS is installed before service migrations run
-    EXECUTE 'CREATE EXTENSION IF NOT EXISTS postgis';
+    EXECUTE 'CREATE EXTENSION IF NOT EXISTS postgis SCHEMA public';
 
     FOREACH service_name IN ARRAY services
     LOOP
@@ -29,12 +29,15 @@ BEGIN
 
         -- 3. Creation of user if nonexistent
         IF NOT EXISTS (SELECT FROM pg_catalog.pg_user WHERE usename = full_user_name) THEN
-        EXECUTE format('CREATE USER %I WITH ENCRYPTED PASSWORD %L', full_user_name, user_password);
+            EXECUTE format('CREATE USER %I WITH ENCRYPTED PASSWORD %L', full_user_name, user_password);
         END IF;
 
         -- 4. Assignment of rights and isolation
         EXECUTE format('GRANT ALL PRIVILEGES ON SCHEMA %I TO %I', service_name, full_user_name);
         EXECUTE format('ALTER ROLE %I SET search_path TO %I', full_user_name, service_name);
+
+        -- 5. Assignment of search_path (schema du service + public pour PostGIS)
+        EXECUTE format('ALTER ROLE %I SET search_path TO %I, public', full_user_name, service_name);
 
         RAISE NOTICE 'Service % configured with user %', service_name, full_user_name;
     END LOOP;
