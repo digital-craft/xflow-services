@@ -1,0 +1,10 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: xflow-infra
+  description: Infrastructure components for XFlow platform
+spec:
+  type: resource
+  lifecycle: experimental
+  owner: platform-team
+  system: xflow-services

@@ -61,6 +61,7 @@ show-urls:
 	@printf "${BLUE}+-------------------------------------------------+\n"
 	@printf "${BLUE}| XFLOW PLATFORM - Development Mode               |\n"
 	@printf "${BLUE}+-------------------------------------------------+\n"
+	@printf "${BLUE}| ${BLUE}%-19s ${BLUE}| ${LIGHT_BLUE}%-27s${BLUE} |\n" "📦 Backstage Portal" "http://localhost:$(BACKSTAGE_FRONTEND_PORT)"
 	@printf "${BLUE}| ${BLUE}%-19s ${BLUE}| ${LIGHT_BLUE}%-27s${BLUE} |\n" "📃 Docs Service"     "http://localhost:$(DOCS_PORT)"
 	@printf "${BLUE}| ${BLUE}%-19s ${BLUE}| ${LIGHT_BLUE}%-27s${BLUE} |\n" "📧 Email Service"     "http://localhost:$(MAILPIT_WEB_UI_PORT)"
 	@printf "${BLUE}| ${BLUE}%-19s ${BLUE}| ${LIGHT_BLUE}%-27s${BLUE} |\n" "🌍 Martin Service"     "http://localhost:$(MARTIN_PORT)"

@@ -14,12 +14,13 @@
 2. [Branching Strategy — Git Flow](#2-branching-strategy--git-flow)
 3. [Commit Conventions — Conventional Commits](#3-commit-conventions--conventional-commits)
 4. [Complete Workflow — From Feature to Merge](#4-complete-workflow--from-feature-to-merge)
-5. [Pull Requests](#5-pull-requests)
-6. [Code Review](#6-code-review)
-7. [Java Code Conventions](#7-java-code-conventions)
-8. [Versioning & Releases — SemVer](#8-versioning--releases--semver)
-9. [Reporting bugs](#9-bug-reporting)
-10. [Security Policy](#10-security-policy)
+5. [Documentation Strategy — Backstage & TechDocs](#5-documentation-strategy--backstage--techdocs)
+6. [Pull Requests](#6-pull-requests)
+7. [Code Review](#7-code-review)
+8. [Java Code Conventions](#8-java-code-conventions)
+9. [Versioning & Releases — SemVer](#9-versioning--releases--semver)
+10. [Reporting bugs](#10-reporting-bugs)
+11. [Security Policy](#11-security-policy)
 
 ---
 
@@ -336,7 +337,7 @@ git add .
 `git push origin feature/auth-refresh-token`
 
 # 6. Open the Pull Request on GitHub to `develop`
-# → Use the PR template (see §5)
+# → Use the PR template (see §6)
 ```
 
 ### Rebase before PR rule
@@ -367,7 +368,57 @@ git add .
 
 ---
 
-## 5. Pull Requests
+## 5. Documentation Strategy — Backstage & TechDocs
+
+XFlow utilise **Spotify Backstage** comme portail développeur et **MkDocs** (via TechDocs) pour la documentation technique. Toute nouvelle fonctionnalité ou service doit être documenté selon les règles suivantes.
+
+### Documenter un nouveau Service
+
+Lors de la création d'un service (ex: `services/xflow-new-service`), vous devez :
+
+#### 1. Créer le manifeste Backstage (`catalog-info.yaml`)
+À la racine de votre service, créez un fichier `catalog-info.yaml` :
+
+```yaml
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: xflow-new-service
+  description: Description courte du service
+  annotations:
+    backstage.io/techdocs-ref: dir:.
+spec:
+  type: service
+  lifecycle: experimental
+  owner: platform-team
+  system: xflow-services
+```
+
+#### 2. Rédiger la documentation technique (`README.md`)
+Créez un fichier `README.md` dans le dossier de votre service. Ce fichier sera rendu dans Backstage via TechDocs. Il doit contenir :
+- La description des fonctionnalités.
+- Les instructions de configuration.
+- Les détails de l'API (ou lien vers Swagger).
+
+#### 3. Référencer le service dans la navigation globale
+Ajoutez votre service dans le fichier `docs/mkdocs.yml` sous la section `nav` pour qu'il apparaisse dans le menu latéral :
+
+```yaml
+nav:
+  - ...
+  - API Reference:
+      - ...
+      - New Service: ../services/xflow-new-service/README.md
+```
+
+### Visualiser la documentation localement
+
+1. **Via MkDocs** : `make dev` lance le conteneur `docs` sur `http://localhost:5000`. Les modifications sont visibles en temps réel.
+2. **Via Backstage** : `make dev` lance le portail sur `http://localhost:3001`.
+
+---
+
+## 6. Pull Requests
 
 ### General Rules
 
@@ -455,7 +506,7 @@ When you open a PR, the following template is automatically loaded from `.github
 
 ---
 
-## 6. Code Review
+## 7. Code Review
 
 ### For the reviewer
 
@@ -530,7 +581,7 @@ praise: great use of the domain method here, keeps the service layer clean
 
 ---
 
-## 7. Java Code Conventions
+## 8. Java Code Conventions
 
 ### Naming
 
@@ -588,7 +639,7 @@ io.xflow.{service}/
 
 ---
 
-## 8. Versioning & Releases — SemVer
+## 9. Versioning & Releases — SemVer
 
 XFlow uses **Semantic Versioning 2.0** (`MAJOR.MINOR.PATCH`).
 
@@ -685,7 +736,7 @@ git push origin --delete hotfix/1.2.1-jwt-null-claim
 
 ---
 
-## 9. Signalement de bugs
+## 10. Signalement de bugs
 
 ### Bugs non critiques
 
@@ -732,7 +783,7 @@ Ouvrir une **GitHub Issue** avec le template `Bug Report` :
 
 ---
 
-## 10. Politique de sécurité
+## 11. Politique de sécurité
 
 > ⚠️ **Ne jamais ouvrir une issue publique GitHub pour signaler une vulnérabilité de sécurité.**
 

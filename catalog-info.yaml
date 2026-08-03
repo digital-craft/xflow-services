@@ -1,0 +1,11 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: xflow-services
+  description: Monorepo for XFlow platform services
+  annotations:
+    backstage.io/techdocs-ref: dir:docs
+spec:
+  type: system
+  lifecycle: experimental
+  owner: platform-team

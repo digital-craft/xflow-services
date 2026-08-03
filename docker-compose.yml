@@ -71,6 +71,27 @@ services:
     networks:
       - xflow-network
 
+  backstage:
+    build:
+      context: ./docs/backstage
+    container_name: backstage
+    ports:
+      - ${BACKSTAGE_FRONTEND_PORT:-3001}:3000
+      - ${BACKSTAGE_PORT:-7007}:7007
+    environment:
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=${POSTGRES_USER:-xflow}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-xflow}
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+    volumes:
+      - ./docs/backstage/app-config.yaml:/app/app-config.yaml
+      - .:/catalog
+    depends_on:
+      - postgres
+    networks:
+      - xflow-network
+
   xflow-api-gateway:
     build:
       context: ./services/xflow-api-gateway

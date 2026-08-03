@@ -1,4 +1,14 @@
-site_name: My site
-site_url: https://xflow.app/
+site_name: XFlow Platform Documentation
+site_url: https://docs.xflow.app/    #nom de domaine suggéré en production pour la doc:   https://docs.xflow.io/
 theme:
   name: 'material'
+
+nav:
+  - Home: index.md
+  - API Reference:
+      - Auth Service: ../services/xflow-auth-service/README.md
+      - Map Service: ../services/xflow-map-service/README.md
+      - API Gateway: ../services/xflow-api-gateway/README.md
+
+plugins:
+  - techdocs-core
