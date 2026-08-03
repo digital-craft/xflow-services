@@ -13,6 +13,7 @@
   <modules>
     <module>services/xflow-api-gateway</module>
     <module>services/xflow-auth-service</module>
+    <module>services/xflow-map-service</module>
   </modules>
 
   <!-- ── Spring Boot inheritance ─────────────────────────────────────── -->
