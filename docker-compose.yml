@@ -137,6 +137,10 @@ services:
       - SPRING_DATASOURCE_USERNAME=map_${COMPOSE_PROJECT_NAME:-xflow}
       - SPRING_DATASOURCE_PASSWORD=map_${POSTGRES_PASSWORD:-xflow}
       - SPRING_DATASOURCE_DRIVER-CLASS-NAME=org.postgresql.Driver
+      - STORAGE_TYPE=${STORAGE_TYPE:-local}
+      - LOCAL_STORAGE_PATH=${LOCAL_STORAGE_PATH:-./uploads/}
+      - AWS_S3_BUCKET_NAME=${AWS_S3_BUCKET_NAME:-}
+      - AWS_REGION=${AWS_REGION:-eu-west-3}
     command: ["./mvnw", "spring-boot:run"]
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
