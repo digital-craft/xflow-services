@@ -31,6 +31,8 @@ CREATE TABLE imported_plans (
     id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     tenant_id           UUID NOT NULL,
     file_url            TEXT NOT NULL,
+    file_size           BIGINT NOT NULL,
+    original_file_name  VARCHAR(255) NOT NULL,
     file_type           VARCHAR(10) NOT NULL CHECK (file_type IN ('PNG','JPG','PDF')),
     opacity_default     SMALLINT NOT NULL DEFAULT 60 CHECK (opacity_default BETWEEN 0 AND 100),
     calibration_status  VARCHAR(20) NOT NULL DEFAULT 'PENDING'

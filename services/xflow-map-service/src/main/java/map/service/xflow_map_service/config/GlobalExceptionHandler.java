@@ -2,7 +2,7 @@ package map.service.xflow_map_service.config;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-// import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -30,7 +30,7 @@ public class GlobalExceptionHandler {
 
         ErrorResponse response = new ErrorResponse(
                 "BAD_REQUEST",
-                "Échec de validation des données d'entrée",
+                "Failed to validate input data",
                 HttpStatus.BAD_REQUEST.value(),
                 errors
         );
@@ -48,22 +48,22 @@ public class GlobalExceptionHandler {
 
         ErrorResponse response = new ErrorResponse(
                 "BAD_REQUEST",
-                "Échec de validation des données d'entrée",
+                "Failed to validate input data",
                 HttpStatus.BAD_REQUEST.value(),
                 errors
         );
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
-    // @ExceptionHandler(AccessDeniedException.class)
-    // public ResponseEntity<ErrorResponse> handleAccessDenied(AccessDeniedException ex) {
-    //     ErrorResponse response = new ErrorResponse(
-    //             "FORBIDDEN",
-    //             "Rôle insuffisant ou accès refusé à cette ressource cartographique.",
-    //             HttpStatus.FORBIDDEN.value()
-    //     );
-    //     return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
-    // }
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAccessDenied(AccessDeniedException ex) {
+        ErrorResponse response = new ErrorResponse(
+                "FORBIDDEN",
+                "Insufficient role or access denied to this map resource.",
+                HttpStatus.FORBIDDEN.value()
+        );
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+    }
 
     @ExceptionHandler(GraphNotConnectedException.class)
     public ResponseEntity<ErrorResponse> handleGraphNotConnected(GraphNotConnectedException ex) {
@@ -99,7 +99,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleGenericException(Exception ex) {
         ErrorResponse response = new ErrorResponse(
                 "INTERNAL_SERVER_ERROR",
-                "Une erreur inattendue est survenue.",
+                "An unexpected error occurred.",
                 HttpStatus.INTERNAL_SERVER_ERROR.value()
         );
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
