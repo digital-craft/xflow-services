@@ -11,6 +11,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -29,6 +30,7 @@ import auth.service.xflow_auth_service.dto.XflowResponse;
 import auth.service.xflow_auth_service.dto.AuditLogResponse;
 
 @RestController
+@RequestMapping("audit-logs")
 @RequiredArgsConstructor
 @Tag(name = "Audit Logs", description = "Audit logging endpoints for tracking system events and changes")
 public class AuditLogController {

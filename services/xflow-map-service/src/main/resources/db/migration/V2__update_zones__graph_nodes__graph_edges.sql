@@ -1,4 +1,4 @@
-SET search_path TO map, public;
+SET search_path = map, public;
 
 ALTER TABLE zones 
   ALTER COLUMN geom TYPE GEOMETRY(MULTIPOLYGON, 4326) 

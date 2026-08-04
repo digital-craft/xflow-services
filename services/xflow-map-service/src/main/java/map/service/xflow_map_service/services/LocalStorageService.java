@@ -31,6 +31,10 @@ public class LocalStorageService implements IFileStorage {
     public String uploadFile(String fileName, byte[] content) {
         Path targetPath = this.basePath.resolve(fileName).normalize();
         try {
+            Path parentDir = targetPath.getParent();
+            if (parentDir != null && Files.notExists(parentDir)) {
+                Files.createDirectories(parentDir);
+            }
             Files.write(targetPath, content);
             return targetPath.toString();
         } catch (IOException e) {
