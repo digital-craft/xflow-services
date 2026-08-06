@@ -4,9 +4,11 @@ Welcome to the XFlow Platform developer documentation.
 
 ## Services
 
-- [Auth Service](../services/xflow-auth-service/README.md)
-- [Map Service](../services/xflow-map-service/README.md)
-- [API Gateway](../services/xflow-api-gateway/README.md)
+- **Auth Service** (`xflow-auth-service`)
+- **Map Service** (`xflow-map-service`)
+- **API Gateway** (`xflow-api-gateway`)
+
+> Each service has its own TechDocs site in the Backstage portal, generated from its `README.md`.
 
 ## Infrastructure
 

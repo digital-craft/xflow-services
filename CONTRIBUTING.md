@@ -400,21 +400,32 @@ Créez un fichier `README.md` dans le dossier de votre service. Ce fichier sera 
 - Les instructions de configuration.
 - Les détails de l'API (ou lien vers Swagger).
 
-#### 3. Référencer le service dans la navigation globale
-Ajoutez votre service dans le fichier `docs/mkdocs.yml` sous la section `nav` pour qu'il apparaisse dans le menu latéral :
+#### 3. Créer la config MkDocs du service (`mkdocs.yml`)
+Créez un fichier `mkdocs.yml` dans le dossier de votre service pour que TechDocs puisse générer son site :
 
 ```yaml
+site_name: XFlow New Service
 nav:
-  - ...
-  - API Reference:
-      - ...
-      - New Service: ../services/xflow-new-service/README.md
+  - Home: README.md
+plugins:
+  - techdocs-core
+```
+
+#### 4. Référencer le service dans le catalogue Backstage
+Ajoutez l'entité du nouveau service dans `docs/backstage/app-config.yaml`, section `catalog.locations` :
+
+```yaml
+catalog:
+  locations:
+    # ...
+    - type: file
+      target: /catalog/services/xflow-new-service/catalog-info.yaml
 ```
 
 ### Visualiser la documentation localement
 
 1. **Via MkDocs** : `make dev` lance le conteneur `docs` sur `http://localhost:5000`. Les modifications sont visibles en temps réel.
-2. **Via Backstage** : `make dev` lance le portail sur `http://localhost:3001`.
+2. **Via Backstage** : `make dev` lance le portail sur `http://localhost:7007`.
 
 ---
 

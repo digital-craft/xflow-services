@@ -41,7 +41,8 @@ services:
       - xflow-network
   
   docs:
-    image: squidfunk/mkdocs-material
+    build:
+      context: ./infra/docker/docs
     container_name: docs
     restart: on-failure
     ports:
@@ -75,8 +76,8 @@ services:
     build:
       context: ./docs/backstage
     container_name: backstage
+    command: ["node", "packages/backend", "--config", "app-config.yaml"]
     ports:
-      - ${BACKSTAGE_FRONTEND_PORT:-3001}:3000
       - ${BACKSTAGE_PORT:-7007}:7007
     environment:
       - POSTGRES_HOST=postgres
@@ -85,8 +86,7 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-xflow}
       - GITHUB_TOKEN=${GITHUB_TOKEN}
     volumes:
-      - ./docs/backstage/app-config.yaml:/app/app-config.yaml
-      - .:/catalog
+      - .:/catalog:ro
     depends_on:
       - postgres
     networks:

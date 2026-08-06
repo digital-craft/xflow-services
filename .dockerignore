@@ -33,5 +33,4 @@ Thumbs.db
 logs/
 
 # Documentation
-docs/backstage/node_modules/
-docs/backstage/dist/
+docs/site/
