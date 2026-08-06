@@ -1,0 +1,6 @@
+site_name: XFlow API Gateway
+docs_dir: .
+nav:
+  - Home: README.md
+plugins:
+  - techdocs-core

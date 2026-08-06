@@ -1,0 +1,6 @@
+site_name: XFlow Auth Service
+docs_dir: .
+nav:
+  - Home: README.md
+plugins:
+  - techdocs-core

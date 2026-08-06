@@ -1,0 +1,6 @@
+site_name: XFlow Map Service
+docs_dir: .
+nav:
+  - Home: README.md
+plugins:
+  - techdocs-core

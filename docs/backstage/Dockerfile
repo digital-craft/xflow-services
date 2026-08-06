@@ -1,20 +1,14 @@
-FROM node:22-bullseye-slim
+# XFlow Backstage portal — prebuilt Backstage image with the app config baked in.
+# mkdocs-techdocs-core is installed so Backstage can generate TechDocs locally
+# (techdocs.generator.runIn: local) without relying on a Docker socket.
+FROM ghcr.io/backstage/backstage:latest
 
-# Install dependencies for node-gyp and backstage
+USER root
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends python3 g++ build-essential libsqlite3-dev && \
-    rm -rf /var/lib/apt/lists/*
+    apt-get install -y --no-install-recommends python3 python3-pip && \
+    rm -rf /var/lib/apt/lists/* && \
+    pip3 install --break-system-packages --no-cache-dir mkdocs-techdocs-core==1.7.0
 
-WORKDIR /app
+COPY app-config.yaml /app/app-config.yaml
 
-# Copy the entire skeleton
-COPY . .
-
-# Install dependencies
-RUN yarn install
-
-EXPOSE 3000
-EXPOSE 7007
-
-# Run the app in development mode
-CMD ["yarn", "start"]
+USER node
