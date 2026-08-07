@@ -5,14 +5,23 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import map.service.xflow_map_service.dao.CalibratePlanRequest;
+import map.service.xflow_map_service.dao.ControlPointRequest;
+import map.service.xflow_map_service.dto.CalibrationPointResponse;
 import map.service.xflow_map_service.dto.ImportedPlanResponse;
 import map.service.xflow_map_service.models.ImportedPlan;
+import map.service.xflow_map_service.models.CalibrationPoint;
 import map.service.xflow_map_service.models.enums.FileType;
+import map.service.xflow_map_service.models.enums.CalibrationStatus;
+import map.service.xflow_map_service.repositories.CalibrationPointRepository;
 import map.service.xflow_map_service.repositories.ImportedPlanRepository;
 import map.service.xflow_map_service.utils.exceptions.ResourceNotFoundException;
+import map.service.xflow_map_service.utils.mappers.CalibrationPointMapper;
 import map.service.xflow_map_service.utils.mappers.ImportedPlanMapper;
 import map.service.xflow_map_service.utils.storage.IFileStorage;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -22,7 +31,10 @@ public class ImportedPlanService {
 
     private final IFileStorage fileStorageService;
     private final ImportedPlanMapper importedPlanMapper;
+    private final CalibrationPointMapper calibrationPointMapper;
     private final ImportedPlanRepository importedPlanRepository;
+    private final CalibrationPointRepository calibrationPointRepository;
+    private final AffineCalibrationService affineCalibrationService;
 
     public ImportedPlanResponse uploadPlan(MultipartFile file) {
         if (file.isEmpty()) {
@@ -69,5 +81,39 @@ public class ImportedPlanService {
                 .orElseThrow(() -> new ResourceNotFoundException("Plan not found: " + planId));
         plan.setOpacityDefault((short) opacity);
         return importedPlanMapper.toResponse(importedPlanRepository.save(plan));
+    }
+
+    @Transactional
+    public List<CalibrationPointResponse> calibratePlan(UUID planId, UUID tenantId, CalibratePlanRequest request) {
+        ImportedPlan plan = importedPlanRepository.findByIdAndTenantId(planId, tenantId)
+                .orElseThrow(() -> new ResourceNotFoundException("Plan d'imposition non trouvé : " + planId));
+
+        calibrationPointRepository.deleteByPlanId(planId);
+
+        var calibrationResult = affineCalibrationService.calculateResiduals(request.controlPoints());
+
+        List<CalibrationPointResponse> pointResponses = new ArrayList<>();
+
+        for (int i = 0; i < request.controlPoints().size(); i++) {
+            ControlPointRequest reqPoint = request.controlPoints().get(i);
+            Double error = calibrationResult.residualErrors().get(i);
+
+            CalibrationPoint entity = new CalibrationPoint();
+            entity.setPlanId(plan);
+            entity.setPixelX(reqPoint.pixelX());
+            entity.setPixelY(reqPoint.pixelY());
+            entity.setLatitude(reqPoint.latitude());
+            entity.setLongitude(reqPoint.longitude());
+            entity.setResidualError(error);
+
+            CalibrationPoint saved = calibrationPointRepository.save(entity);
+
+            pointResponses.add(calibrationPointMapper.toResponse(saved));
+        }
+
+        plan.setCalibrationStatus(CalibrationStatus.CALIBRATED);
+        importedPlanRepository.save(plan);
+
+        return pointResponses;
     }
 }
