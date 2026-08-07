@@ -1,6 +1,7 @@
 package map.service.xflow_map_service.services;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -8,6 +9,7 @@ import map.service.xflow_map_service.dto.ImportedPlanResponse;
 import map.service.xflow_map_service.models.ImportedPlan;
 import map.service.xflow_map_service.models.enums.FileType;
 import map.service.xflow_map_service.repositories.ImportedPlanRepository;
+import map.service.xflow_map_service.utils.exceptions.ResourceNotFoundException;
 import map.service.xflow_map_service.utils.mappers.ImportedPlanMapper;
 import map.service.xflow_map_service.utils.storage.IFileStorage;
 
@@ -44,7 +46,7 @@ public class ImportedPlanService {
                 .fileUrl(fileUrl)
                 .fileType(fileType.name())
                 .fileSize(file.getSize())
-                .tenantId(UUID.randomUUID())
+                .tenantId(UUID.fromString("00000000-0000-0000-0000-000000000000"))
                 .build();
             ImportedPlan savedPlan = importedPlanRepository.save(importedPlan);
             return importedPlanMapper.toResponse(savedPlan);
@@ -59,5 +61,13 @@ public class ImportedPlanService {
             }
             throw new RuntimeException("Error occurred while reading the uploaded file", e);
         }
+    }
+
+    @Transactional
+    public ImportedPlanResponse updateOpacity(UUID planId, UUID tenantId, int opacity) {
+        ImportedPlan plan = importedPlanRepository.findByIdAndTenantId(planId, tenantId)
+                .orElseThrow(() -> new ResourceNotFoundException("Plan not found: " + planId));
+        plan.setOpacityDefault((short) opacity);
+        return importedPlanMapper.toResponse(importedPlanRepository.save(plan));
     }
 }
