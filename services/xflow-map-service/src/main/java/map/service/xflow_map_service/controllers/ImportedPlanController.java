@@ -3,16 +3,24 @@ package map.service.xflow_map_service.controllers;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 // import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.multipart.MultipartFile;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import map.service.xflow_map_service.dao.UpdateOpacityRequest;
 import map.service.xflow_map_service.dto.ImportedPlanResponse;
 import map.service.xflow_map_service.dto.XflowResponse;
 import map.service.xflow_map_service.services.ImportedPlanService;
+
+import java.util.UUID;
 
 @RequiredArgsConstructor
 @RequestMapping("plans")
@@ -26,5 +34,16 @@ public class ImportedPlanController {
     public ResponseEntity<XflowResponse<ImportedPlanResponse>> uploadPlan(@RequestParam("file") MultipartFile file) {
         ImportedPlanResponse response = planService.uploadPlan(file);
         return ResponseEntity.ok(new XflowResponse<>("plan-imported-successfully", response));
+    }
+    
+    @PatchMapping("/{id}/opacity")
+    // @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<XflowResponse<ImportedPlanResponse>> updateOpacity(
+        @PathVariable("id") UUID planId,
+        @RequestHeader("X-Tenant-ID") UUID tenantId,
+        @Valid @RequestBody UpdateOpacityRequest request
+    ) {
+        ImportedPlanResponse response = planService.updateOpacity(planId, tenantId, request.opacity());
+        return ResponseEntity.ok(new XflowResponse<>("plan-opacity-updated-successfully", response));
     }
 }
