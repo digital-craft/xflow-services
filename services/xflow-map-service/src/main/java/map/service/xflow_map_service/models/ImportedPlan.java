@@ -22,7 +22,7 @@ import java.util.UUID;
 public class ImportedPlan extends DateBaseModel {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", nullable = false, updatable = false)
     private UUID id;
 

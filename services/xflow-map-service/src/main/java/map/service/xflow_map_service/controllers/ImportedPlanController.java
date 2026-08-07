@@ -15,11 +15,14 @@ import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import map.service.xflow_map_service.dao.CalibratePlanRequest;
 import map.service.xflow_map_service.dao.UpdateOpacityRequest;
+import map.service.xflow_map_service.dto.CalibrationPointResponse;
 import map.service.xflow_map_service.dto.ImportedPlanResponse;
 import map.service.xflow_map_service.dto.XflowResponse;
 import map.service.xflow_map_service.services.ImportedPlanService;
 
+import java.util.List;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -45,5 +48,16 @@ public class ImportedPlanController {
     ) {
         ImportedPlanResponse response = planService.updateOpacity(planId, tenantId, request.opacity());
         return ResponseEntity.ok(new XflowResponse<>("plan-opacity-updated-successfully", response));
+    }
+    
+    @PostMapping("/{id}/calibrate")
+    // @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<XflowResponse<List<CalibrationPointResponse>>> calibratePlan(
+        @PathVariable("id") UUID planId,
+        @RequestHeader("X-Tenant-ID") UUID tenantId,
+        @Valid @RequestBody CalibratePlanRequest request
+    ) {
+        List<CalibrationPointResponse> response = planService.calibratePlan(planId, tenantId, request);
+        return ResponseEntity.ok(new XflowResponse<>("plan-calibrated-successfully", response));
     }
 }
