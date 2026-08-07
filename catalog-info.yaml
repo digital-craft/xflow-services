@@ -1,4 +1,12 @@
 apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: xflow-services
+  description: XFlow platform system
+spec:
+  owner: platform-team
+---
+apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
   name: xflow-services
@@ -6,6 +14,7 @@ metadata:
   annotations:
     backstage.io/techdocs-ref: dir:docs
 spec:
-  type: system
+  type: website
   lifecycle: experimental
   owner: platform-team
+  system: xflow-services

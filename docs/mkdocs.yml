@@ -1,6 +1,8 @@
 site_name: XFlow Platform Documentation
 site_url: https://docs.xflow.app/    #nom de domaine suggéré en production pour la doc:   https://docs.xflow.io/
 docs_dir: .
+exclude_docs: |
+  backstage/
 theme:
   name: 'material'
 

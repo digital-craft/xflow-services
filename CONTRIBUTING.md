@@ -372,6 +372,19 @@ git add .
 
 XFlow utilise **Spotify Backstage** comme portail développeur et **MkDocs** (via TechDocs) pour la documentation technique. Toute nouvelle fonctionnalité ou service doit être documenté selon les règles suivantes.
 
+> ### En 2 minutes — le principe
+>
+> **L'idée** : vous écrivez la doc en **Markdown** dans le repo ; **Backstage** (un site web dans un conteneur Docker) la lit et l'affiche dans un portail.
+>
+> **Le mécanisme** : vous écrivez dans le `README.md` du service → Backstage lit le repo (monté en **lecture seule**, `:ro`) → l'onglet **Docs** du service affiche votre README. **Pas de déploiement** : vous commitez, et le portail lit la dernière version au clic.
+>
+> **Pour un nouveau service — 3 étapes** :
+> 1. Créez 3 fichiers dans `services/<svc>/` : `catalog-info.yaml` (carte d'identité), `README.md` (la doc), `mkdocs.yml` (le rendu).
+> 2. Ajoutez 2 lignes dans `docs/backstage/app-config.yaml` (`catalog.locations`) pour dire « lis aussi cette carte d'identité ».
+> 3. Redémarrez Backstage.
+>
+> **Les 2 pièges** : sans `mkdocs.yml`, TechDocs tente d'écrire `docs/index.md` dans le repo → interdit en lecture seule → doc non générée. Sans la ligne dans `app-config.yaml`, le service n'apparaît jamais dans le portail.
+
 ### Documenter un nouveau Service
 
 Lors de la création d'un service (ex: `services/xflow-new-service`), vous devez :
@@ -401,10 +414,11 @@ Créez un fichier `README.md` dans le dossier de votre service. Ce fichier sera 
 - Les détails de l'API (ou lien vers Swagger).
 
 #### 3. Créer la config MkDocs du service (`mkdocs.yml`)
-Créez un fichier `mkdocs.yml` dans le dossier de votre service pour que TechDocs puisse générer son site :
+Créez un fichier `mkdocs.yml` dans le dossier de votre service pour que TechDocs puisse générer son site. `site_name` doit être **aligné sur le nom du service** (`XFlow <Service Name>`) et `docs_dir: .` est obligatoire pour que le `README.md` racine soit rendu en lecture seule :
 
 ```yaml
 site_name: XFlow New Service
+docs_dir: .
 nav:
   - Home: README.md
 plugins:
