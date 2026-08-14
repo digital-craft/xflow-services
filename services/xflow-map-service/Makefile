@@ -42,6 +42,6 @@ watch-map:
 		timeout=$$((timeout - 1)); \
 	done
 	@echo "Target directory detected for xflow-map-service. Applying permissions..."
-	sudo chown -cR $(shell id -u):$(shell id -g) services/xflow-map-service/target
-	sudo chmod -cR u+rw services/xflow-map-service/target
+	sudo chown -R $(shell id -u):$(shell id -g) services/xflow-map-service/target
+	sudo chmod -R  u+rw services/xflow-map-service/target
 	@echo "Permissions applied successfully on xflow-map-service !"

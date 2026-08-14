@@ -42,6 +42,6 @@ watch-auth:
 		timeout=$$((timeout - 1)); \
 	done
 	@echo "Target directory detected for xflow-auth-service. Applying permissions..."
-	sudo chown -cR $(shell id -u):$(shell id -g) services/xflow-auth-service/target
-	sudo chmod -cR u+rw services/xflow-auth-service/target
+	sudo chown -R $(shell id -u):$(shell id -g) services/xflow-auth-service/target
+	sudo chmod -R u+rw services/xflow-auth-service/target
 	@echo "Permissions applied successfully on xflow-auth-service !"

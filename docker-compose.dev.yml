@@ -5,6 +5,13 @@ services:
   redis:
     container_name: redis-dev
 
+  backstage:
+    container_name: backstage-dev
+    command: ["node", "packages/backend", "--config", "app-config.yaml", "--config", "app-config.dev.yaml"]
+    volumes:
+      - ./docs/backstage/app-config.yaml:/app/app-config.yaml:ro
+      - ./docs/backstage/app-config.dev.yaml:/app/app-config.dev.yaml:ro
+
   docs:
     container_name: docs-dev
     command: serve -a 0.0.0.0:8000

@@ -1,0 +1,46 @@
+# Production Backstage config — loaded on top of app-config.yaml
+# via `--config app-config.yaml --config app-config.production.yaml`.
+# No secrets in this file: every value comes from environment variables.
+#
+# Required env vars at deploy time:
+#   BACKSTAGE_BASE_URL   e.g. https://portal.xflow.app
+#   POSTGRES_HOST/PORT/USER/PASSWORD   (already read from app-config.yaml)
+#   GITHUB_TOKEN
+#   AUTH_GITHUB_CLIENT_ID / AUTH_GITHUB_CLIENT_SECRET   (GitHub OAuth app)
+#
+# The guest provider and file-based catalog locations are dev-only
+# (app-config.dev.yaml) and never apply here.
+app:
+  baseUrl: ${BACKSTAGE_BASE_URL}
+
+backend:
+  baseUrl: ${BACKSTAGE_BASE_URL}
+  cors:
+    origin: ${BACKSTAGE_BASE_URL}
+  csp:
+    connect-src: ["'self'", 'https:']
+
+integrations:
+  github:
+    - host: github.com
+      token: ${GITHUB_TOKEN}
+
+auth:
+  environment: production
+  providers:
+    github:
+      production:
+        clientId: ${AUTH_GITHUB_CLIENT_ID}
+        clientSecret: ${AUTH_GITHUB_CLIENT_SECRET}
+        # signIn:
+        #   resolvers:
+        #     - resolver: emailMatchingUserEntityProfileEmail
+        # Uncomment and adjust if you have User entities in the catalog.
+        # Replace this provider with OIDC/Okta if the team already uses an IdP.
+
+catalog:
+  locations:
+    - type: url
+      target: https://github.com/digital-craft/xflow-services/blob/main/catalog-info.yaml
+    # Alternatively enable GitHub org discovery under integrations.github
+    # (apps + org: true) so every repo with a catalog-info.yaml is ingested.

@@ -1,0 +1,26 @@
+# Development-only Backstage config — loaded on top of app-config.yaml
+# via `--config app-config.yaml --config app-config.dev.yaml`
+# (see docker-compose.dev.yml). Never used in production.
+backend:
+  csp:
+    connect-src: ["'self'", 'http:', 'https:']
+
+auth:
+  providers:
+    guest:
+      dangerouslyAllowOutsideDevelopment: true
+
+catalog:
+  locations:
+    - type: file
+      target: /catalog/catalog-info.yaml
+    - type: file
+      target: /catalog/services/xflow-auth-service/catalog-info.yaml
+    - type: file
+      target: /catalog/services/xflow-api-gateway/catalog-info.yaml
+    - type: file
+      target: /catalog/services/xflow-map-service/catalog-info.yaml
+    - type: file
+      target: /catalog/infra/catalog-info.yaml
+    - type: file
+      target: /catalog/docs/backstage/catalog-info.yaml

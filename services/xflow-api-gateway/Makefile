@@ -42,6 +42,6 @@ watch-gateway:
 		timeout=$$((timeout - 1)); \
 	done
 	@echo "Target directory detected for xflow-api-gateway. Applying permissions..."
-	sudo chown -cR $(shell id -u):$(shell id -g) services/xflow-api-gateway/target
-	sudo chmod -cR u+rw services/xflow-api-gateway/target
+	sudo chown -R $(shell id -u):$(shell id -g) services/xflow-api-gateway/target
+	sudo chmod -R u+rw services/xflow-api-gateway/target
 	@echo "Permissions applied successfully on xflow-api-gateway !"

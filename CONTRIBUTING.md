@@ -380,10 +380,10 @@ XFlow utilise **Spotify Backstage** comme portail développeur et **MkDocs** (vi
 >
 > **Pour un nouveau service — 3 étapes** :
 > 1. Créez 3 fichiers dans `services/<svc>/` : `catalog-info.yaml` (carte d'identité), `README.md` (la doc), `mkdocs.yml` (le rendu).
-> 2. Ajoutez 2 lignes dans `docs/backstage/app-config.yaml` (`catalog.locations`) pour dire « lis aussi cette carte d'identité ».
+> 2. Ajoutez 2 lignes dans `docs/backstage/app-config.dev.yaml` (`catalog.locations`) pour dire « lis aussi cette carte d'identité ».
 > 3. Redémarrez Backstage.
 >
-> **Les 2 pièges** : sans `mkdocs.yml`, TechDocs tente d'écrire `docs/index.md` dans le repo → interdit en lecture seule → doc non générée. Sans la ligne dans `app-config.yaml`, le service n'apparaît jamais dans le portail.
+> **Les 2 pièges** : sans `mkdocs.yml`, TechDocs tente d'écrire `docs/index.md` dans le repo → interdit en lecture seule → doc non générée. Sans la ligne dans `app-config.dev.yaml`, le service n'apparaît jamais dans le portail.
 
 ### Documenter un nouveau Service
 
@@ -426,7 +426,7 @@ plugins:
 ```
 
 #### 4. Référencer le service dans le catalogue Backstage
-Ajoutez l'entité du nouveau service dans `docs/backstage/app-config.yaml`, section `catalog.locations` :
+Ajoutez l'entité du nouveau service dans `docs/backstage/app-config.dev.yaml`, section `catalog.locations` :
 
 ```yaml
 catalog:
@@ -435,6 +435,23 @@ catalog:
     - type: file
       target: /catalog/services/xflow-new-service/catalog-info.yaml
 ```
+
+> **En prod** : pas de montage `/catalog` local. Les locations viennent de l'overlay `app-config.production.yaml` (`type: url` sur le repo GitHub ou GitHub org discovery) — on n'ajoute donc rien côté dev pour la prod.
+
+### Configuration Backstage (dev / prod)
+
+L'image Backstage (`docs/backstage/Dockerfile`) est **neutre** : aucune config n'y est embarquée. Tout est fourni au runtime par couches de config :
+
+| Fichier | Rôle | Chargé par |
+|---|---|---|
+| `docs/backstage/app-config.yaml` | Base, pilotée par variables d'env (`BACKSTAGE_BASE_URL`, `POSTGRES_*`, `GITHUB_TOKEN`) | dev + prod |
+| `docs/backstage/app-config.dev.yaml` | Overlay dev : auth `guest`, CSP permissif, catalogue local (`/catalog`) | `docker-compose.dev.yml` |
+| `docs/backstage/app-config.production.yaml` | Overlay prod : URL publique, OAuth GitHub, locations GitHub | votre déploiement |
+
+**Règles** :
+- Un nouveau service s'ajoute **uniquement** dans `app-config.dev.yaml` (`catalog.locations`, `type: file`).
+- La config dev ne doit **jamais** être embarquée ni déployée en prod : l'image reste neutre, la prod fournit son propre overlay + ses variables d'env (`--config app-config.yaml --config app-config.production.yaml`).
+- Ne committez jamais de secret dans ces fichiers : tout passe par `${VARIABLE}`.
 
 ### Visualiser la documentation localement
 

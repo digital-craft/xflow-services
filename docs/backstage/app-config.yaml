@@ -1,16 +1,27 @@
+# Base Backstage config — environment-agnostic.
+# Development-only values (guest auth, permissive CSP, file-based catalog
+# locations) live in app-config.dev.yaml, mounted by docker-compose.dev.yml.
+# Production supplies its own values via environment variables
+# (BACKSTAGE_BASE_URL, POSTGRES_*, GITHUB_TOKEN) or its own config overlay.
+# GitHub integration lives in app-config.production.yaml so local dev
+# (file-based catalog) does not require a GITHUB_TOKEN.
 app:
   title: XFlow Developer Portal
-  baseUrl: http://localhost:7007
+  baseUrl: ${BACKSTAGE_BASE_URL:-http://localhost:7007}
+  extensions:
+    - app/routes:
+        config:
+          redirects:
+            - from: /
+              to: /catalog
 
 backend:
-  baseUrl: http://localhost:7007
+  baseUrl: ${BACKSTAGE_BASE_URL:-http://localhost:7007}
   listen:
     port: 7007
     host: 0.0.0.0
-  csp:
-    connect-src: ["'self'", 'http:', 'https:']
   cors:
-    origin: http://localhost:7007
+    origin: ${BACKSTAGE_BASE_URL:-http://localhost:7007}
     methods: [GET, HEAD, PATCH, POST, PUT, DELETE]
     credentials: true
   database:
@@ -21,11 +32,6 @@ backend:
       user: ${POSTGRES_USER}
       password: ${POSTGRES_PASSWORD}
 
-integrations:
-  github:
-    - host: github.com
-      token: ${GITHUB_TOKEN}
-
 techdocs:
   builder: 'local'
   generator:
@@ -33,26 +39,9 @@ techdocs:
   publisher:
     type: 'local'
 
-auth:
-  providers:
-    guest: {}
-
 catalog:
   import:
     entityFilename: catalog-info.yaml
     pullRequestBranchName: backstage-updates
   rules:
     - allow: [Component, System, API, Resource, Location]
-  locations:
-    - type: file
-      target: /catalog/catalog-info.yaml
-    - type: file
-      target: /catalog/services/xflow-auth-service/catalog-info.yaml
-    - type: file
-      target: /catalog/services/xflow-api-gateway/catalog-info.yaml
-    - type: file
-      target: /catalog/services/xflow-map-service/catalog-info.yaml
-    - type: file
-      target: /catalog/infra/catalog-info.yaml
-    - type: file
-      target: /catalog/docs/backstage/catalog-info.yaml
