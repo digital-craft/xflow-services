@@ -30,6 +30,10 @@ public class ImportedPlan extends DateBaseModel {
     @Column(name = "tenant_id", nullable = false)
     private UUID tenantId;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "map_version_id", nullable = false)
+    private MapVersion mapVersion;
+
     @NotNull
     @Column(name = "original_file_name", nullable = false)
     private String originalFileName;

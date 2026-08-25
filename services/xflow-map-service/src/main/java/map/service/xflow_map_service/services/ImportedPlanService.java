@@ -10,11 +10,13 @@ import map.service.xflow_map_service.dao.ControlPointRequest;
 import map.service.xflow_map_service.dto.CalibrationPointResponse;
 import map.service.xflow_map_service.dto.ImportedPlanResponse;
 import map.service.xflow_map_service.models.ImportedPlan;
+import map.service.xflow_map_service.models.MapVersion;
 import map.service.xflow_map_service.models.CalibrationPoint;
 import map.service.xflow_map_service.models.enums.FileType;
 import map.service.xflow_map_service.models.enums.CalibrationStatus;
 import map.service.xflow_map_service.repositories.CalibrationPointRepository;
 import map.service.xflow_map_service.repositories.ImportedPlanRepository;
+import map.service.xflow_map_service.repositories.MapVersionRepository;
 import map.service.xflow_map_service.utils.exceptions.ResourceNotFoundException;
 import map.service.xflow_map_service.utils.mappers.CalibrationPointMapper;
 import map.service.xflow_map_service.utils.mappers.ImportedPlanMapper;
@@ -35,8 +37,9 @@ public class ImportedPlanService {
     private final ImportedPlanRepository importedPlanRepository;
     private final CalibrationPointRepository calibrationPointRepository;
     private final AffineCalibrationService affineCalibrationService;
+    private final MapVersionRepository mapVersionRepository;
 
-    public ImportedPlanResponse uploadPlan(MultipartFile file) {
+    public ImportedPlanResponse uploadPlan(UUID mapVersionId, MultipartFile file) {
         if (file.isEmpty()) {
             throw new IllegalArgumentException("The file cannot be empty.");
         }
@@ -53,9 +56,12 @@ public class ImportedPlanService {
             }
             relativePath = "plans/" + extension.replace(".", "") + "/" + UUID.randomUUID() + extension;
             String fileUrl = fileStorageService.uploadFile(relativePath, file.getBytes());
+            MapVersion mapVersion = mapVersionRepository.findById(mapVersionId)
+                    .orElseThrow(() -> new ResourceNotFoundException("map-version-not-found: " + mapVersionId));
             ImportedPlan importedPlan = ImportedPlan.builder()
                 .originalFileName(originalFilename)
                 .fileUrl(fileUrl)
+                .mapVersion(mapVersion)
                 .fileType(fileType.name())
                 .fileSize(file.getSize())
                 .tenantId(UUID.fromString("00000000-0000-0000-0000-000000000000"))

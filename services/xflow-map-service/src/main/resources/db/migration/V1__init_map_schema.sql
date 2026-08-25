@@ -17,8 +17,8 @@ CREATE TABLE map_versions (
     status              VARCHAR(10) NOT NULL DEFAULT 'DRAFT'
                           CHECK (status IN ('DRAFT', 'PUBLISHED')),
     sequence_number     INTEGER NOT NULL,
-    published_at        TIMESTAMPTZ NOT NULL DEFAULT now(),
-    published_by        UUID NOT NULL,
+    published_at        TIMESTAMPTZ,
+    published_by        UUID,
     change_summary      TEXT,
     urgency             VARCHAR(10) NOT NULL DEFAULT 'NORMAL'
                           CHECK (urgency IN ('NORMAL', 'IMMEDIATE')),

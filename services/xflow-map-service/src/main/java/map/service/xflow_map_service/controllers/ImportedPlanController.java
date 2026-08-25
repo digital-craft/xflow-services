@@ -32,10 +32,13 @@ public class ImportedPlanController {
     
     private final ImportedPlanService planService;
 
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     // @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<XflowResponse<ImportedPlanResponse>> uploadPlan(@RequestParam("file") MultipartFile file) {
-        ImportedPlanResponse response = planService.uploadPlan(file);
+    public ResponseEntity<XflowResponse<ImportedPlanResponse>> uploadPlan(
+        @PathVariable("id") UUID mapVersion,
+        @RequestParam("file") MultipartFile file
+    ) {
+        ImportedPlanResponse response = planService.uploadPlan(mapVersion, file);
         return ResponseEntity.ok(new XflowResponse<>("plan-imported-successfully", response));
     }
     

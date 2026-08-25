@@ -8,6 +8,7 @@ import java.util.UUID;
 public record ImportedPlanResponse (
     UUID id,
     UUID tenantId,
+    // UUID mapVersion,
     String originalFileName,
     String fileUrl,
     String fileType,
