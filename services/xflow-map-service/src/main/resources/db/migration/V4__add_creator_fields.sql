@@ -1,5 +1,9 @@
 SET search_path = map, public;
 
+ALTER TABLE zones
+    ADD COLUMN created_by UUID NOT NULL,
+    ADD COLUMN updated_by UUID NOT NULL;
+
 ALTER TABLE zone_types
     ADD COLUMN created_by UUID NOT NULL,
     ADD COLUMN updated_by UUID NOT NULL;
