@@ -26,6 +26,7 @@ public class GeoJsonLineStringMapper {
             Geometry geometry = reader.read(json);
 
             if (geometry instanceof LineString lineString) {
+                lineString.setSRID(4326);
                 return lineString;
             }
             throw new IllegalArgumentException("Provided GeoJSON geometry must be a LineString.");

@@ -29,7 +29,7 @@ public class Obstacle extends DateBaseModel {
     @JoinColumn(name = "map_version_id", nullable = false)
     private MapVersion mapVersion;
     
-    @Column(name = "geom", nullable = false, columnDefinition = "geometry(LineString,4326)")
+    @Column(name = "geom", nullable = false)
     private LineString geom;
     
     @NotNull
